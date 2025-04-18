@@ -1,0 +1,1 @@
+﻿[Wiki page](https://github.com/Satan1c/ZZMI_tools/wiki)
