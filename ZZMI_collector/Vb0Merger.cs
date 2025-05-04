@@ -6,19 +6,19 @@ namespace ZZMI_collector;
 public static partial class Vb0Merger
 {
 	[GeneratedRegex(
-		@"stride: ([0-9]+)",
+		"stride: ([0-9]+)",
 		RegexOptions.IgnoreCase | RegexOptions.Compiled | RegexOptions.Singleline | RegexOptions.CultureInvariant
 	)]
 	private static partial Regex StrideRegex();
 
 	[GeneratedRegex(
-		@"Format: (.+)",
+		"Format: (.+)",
 		RegexOptions.IgnoreCase | RegexOptions.Compiled | RegexOptions.Singleline | RegexOptions.CultureInvariant
 	)]
 	private static partial Regex FormatRegex();
 
 	[GeneratedRegex(
-		@"vb([0-9])",
+		"vb([0-9])",
 		RegexOptions.IgnoreCase | RegexOptions.Compiled | RegexOptions.Singleline | RegexOptions.CultureInvariant
 	)]
 	private static partial Regex VbRegex();

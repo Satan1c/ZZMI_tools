@@ -6,12 +6,12 @@ namespace Fixer;
 public static class CnShitCleaner
 {
 	private static readonly Regex s_checksRegex = new(
-		@"checktextureoverride = ps-t[3-6]",
+		"checktextureoverride = ps-t[3-6]",
 		RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.Singleline
 	);
 
 	private static readonly Regex s_backRegex = new(
-		@"Resource.Bak",
+		"Resource.Bak",
 		RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.Singleline
 	);
 

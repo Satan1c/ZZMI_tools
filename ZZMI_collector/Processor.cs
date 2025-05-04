@@ -20,18 +20,18 @@ public static partial class Processor
 	private static readonly Dictionary<string, LinkedList<ObjectData>>[] s_lodArray
 		= Enumerable.Range(0, s_lodDirs.Length).Select(_ => new Dictionary<string, LinkedList<ObjectData>>()).ToArray();
 
-	[GeneratedRegex(@"([0-9]{6})-", RegexOptions.Compiled | RegexOptions.Singleline | RegexOptions.NonBacktracking, -1)]
+	[GeneratedRegex("([0-9]{6})-", RegexOptions.Compiled | RegexOptions.Singleline | RegexOptions.NonBacktracking, -1)]
 	private static partial Regex FrameRegex();
 
 	[GeneratedRegex(@"-(ps-t[1-6])=(.{8}).*\.dds",
 		RegexOptions.Compiled | RegexOptions.Singleline | RegexOptions.NonBacktracking, -1)]
 	private static partial Regex PsRegex();
 
-	[GeneratedRegex(@"[0-9]{6}-(ib|vb[012])?=(.{8})",
+	[GeneratedRegex("[0-9]{6}-(ib|vb[012])?=(.{8})",
 		RegexOptions.Compiled | RegexOptions.Singleline | RegexOptions.NonBacktracking, -1)]
 	private static partial Regex IbVbRegex();
 
-	[GeneratedRegex(@"-vs=(.{16})", RegexOptions.Compiled | RegexOptions.Singleline | RegexOptions.NonBacktracking, -1)]
+	[GeneratedRegex("-vs=(.{16})", RegexOptions.Compiled | RegexOptions.Singleline | RegexOptions.NonBacktracking, -1)]
 	private static partial Regex VsRegex();
 
 	[GeneratedRegex(@"first index: (\d+)",
