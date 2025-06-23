@@ -37,7 +37,7 @@ const string SlotFixNormalMap = @$"{SlotFixDiffuse}
 Resource\ZZMI\NormalMap = ref Resource{{0}}NormalMap
 {SlotFixLmMm}";
 const string SlotFixFlatNormalMap = @$"{SlotFixDiffuse}
-Resource\ZZMI\NormalMap = ref Resource\ZZMIv1\FlatNormalMap
+Resource\ZZMI\NormalMap = ref Resource\ZZMI\FlatNormalMap
 {SlotFixLmMm}";
 
 data = ibSectionsRegex.Replace(data, (match) =>
@@ -47,12 +47,12 @@ data = ibSectionsRegex.Replace(data, (match) =>
 	var index = match.Groups["Index"].Value;
 	var ib = match.Groups["IB"].Value;
 	
-	var res = resources[name];
+	var res = resources[name].Count;
 
 	var replacement = @$"[TextureOverride{name}]
 hash = {hash}{index}{ib}
 {
-	string.Format(res.Count switch
+	string.Format(res switch
 	{
 		1 => SlotFixDiffuse,
 		3 => SlotFixFlatNormalMap,
