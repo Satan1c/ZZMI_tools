@@ -1,18 +1,17 @@
-﻿
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 
-const string og = @"/Users/oleksandr.fedotov/RiderProjects/ZZMI_tools/SlotsFixApplier/Belle.ini";
-const string edited = @"/Users/oleksandr.fedotov/RiderProjects/ZZMI_tools/SlotsFixApplier/Edited.ini";
+const string og = @"Belle.ini";
+const string edited = @"Edited.ini";
 
 using var file = File.OpenRead(og);
 using var reader = new StreamReader(file, leaveOpen: false);
 var data = reader.ReadToEnd();
 
-var ibSectionsRegex = new Regex(@"\[TextureOverride(?<Name>\w+[^IB]{2}[A-Z]{1}|\w+Face[A-Z]?)(?:IB)?\]\s+(?:hash = (?<Hash>\w{8}))(?<Index>\s+match_first_index = (?<IndexValue>\d+))?\s*(?<SkinTexture>run = CommandListSkinTexture)(?<IB>\s+ib = (?<IBvalue>\w+))?(?:\s+(?:Resource\\ZZMI\\NormalMap = ref |ps-t4 = )\w+\s+)?(?<SetTextures>run = CommandList\\ZZMI\\SetTextures)?", RegexOptions.Compiled | RegexOptions.Singleline);
-var resourcesRegex = new Regex(@"\[Resource(?<Part>\w+[A-Z]{1})(?<Texture>Diffuse|NormalMap|LightMap|MaterialMap)\]", RegexOptions.Compiled);
-var normalMapsRegex = new Regex(@"\s*\[TextureOverride[\w.]+NormalMap(?:\.1024|\.2048)?\]\s*hash = \w{8}\s*this = \w+\s", RegexOptions.Compiled);
+var ibSectionsRegex = IbSectionsRegex();
+var resourcesRegex = ResourcesRegex();
+var normalMapsRegex = NormalMapsRegex();
 
 data = normalMapsRegex.Replace(data, string.Empty);
 
@@ -26,7 +25,7 @@ foreach (Match match in resourcesRegex.Matches(data))
 	{
 		resource = [];
 	}
-	
+
 	resource!.AddLast(texture);
 }
 
@@ -46,7 +45,7 @@ data = ibSectionsRegex.Replace(data, (match) =>
 	var hash = match.Groups["Hash"].Value;
 	var index = match.Groups["Index"].Value;
 	var ib = match.Groups["IB"].Value;
-	
+
 	var res = resources[name];
 
 	var replacement = @$"[TextureOverride{name}]
@@ -66,3 +65,19 @@ run = CommandList\ZZMI\SetTextures";
 using var editedFile = File.Create(edited);
 using var writer = new StreamWriter(editedFile, Encoding.UTF8);
 writer.Write(data);
+
+internal partial class Program
+{
+	[GeneratedRegex(
+		@"\[TextureOverride(?<Name>\w+[^IB]{2}[A-Z]{1}|\w+Face[A-Z]?)(?:IB)?\]\s+(?:hash = (?<Hash>\w{8}))(?<Index>\s+match_first_index = (?<IndexValue>\d+))?\s*(?<SkinTexture>run = CommandListSkinTexture)(?<IB>\s+ib = (?<IBvalue>\w+))?(?:\s+(?:Resource\\ZZMI\\NormalMap = ref |ps-t4 = )\w+\s+)?(?<SetTextures>run = CommandList\\ZZMI\\SetTextures)?",
+		RegexOptions.Compiled | RegexOptions.Singleline)]
+	private static partial Regex IbSectionsRegex();
+
+	[GeneratedRegex(@"\[Resource(?<Part>\w+[A-Z]{1})(?<Texture>Diffuse|NormalMap|LightMap|MaterialMap)\]",
+		RegexOptions.Compiled)]
+	private static partial Regex ResourcesRegex();
+
+	[GeneratedRegex(@"\s*\[TextureOverride[\w.]+NormalMap(?:\.1024|\.2048)?\]\s*hash = \w{8}\s*this = \w+\s",
+		RegexOptions.Compiled)]
+	private static partial Regex NormalMapsRegex();
+}
