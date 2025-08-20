@@ -44,7 +44,7 @@
 		vb2 = Resource.{{component.name}}.Blend
 		if DRAW_TYPE == 1
 			vb0 = Resource.{{component.name}}.Position
-			draw = {{ component.vertex_count }}, 0
+			Draw = {{ component.vertex_count }}, 0
 			{% if credit != "" %}
 
 				$active = 1
@@ -96,13 +96,23 @@
 				{% endfor %}
 				run = CommandList\ZZMI\SetTextures
 			{% endif %}
-			{% for entry in part.objects if entry.vertex_count > 0 %}
-				{% if loop.previtem and loop.previtem.collection_name != entry.collection_name %}
-					; {{ entry.collection_name }}
-				{% endif %}
-				; {{ entry.name }} ({{ entry.vertex_count }})
-				drawindexed = {{ entry.index_count}}, {{ entry.index_offset }}, 0
-			{% endfor %}
+			if DRAW_TYPE == 2
+				{% for entry in part.objects if entry.vertex_count > 0 %}
+					{% if loop.previtem and loop.previtem.collection_name != entry.collection_name %}
+						; {{ entry.collection_name }}
+					{% endif %}
+					; {{ entry.name }} ({{ entry.vertex_count }})
+					DrawIndexed = {{ entry.index_count}}, {{ entry.index_offset }}, 0
+				{% endfor %}
+			elif DRAW_TYPE == 4
+				{% for entry in part.objects if entry.vertex_count > 0 %}
+					{% if loop.previtem and loop.previtem.collection_name != entry.collection_name %}
+						; {{ entry.collection_name }}
+					{% endif %}
+					; {{ entry.name }} ({{ entry.vertex_count }})
+					DrawIndexedInstanced = {{ entry.index_count}}, instance_count, {{ entry.index_offset }}, 0, first_instance
+				{% endfor %}
+			endif
 
 		{% endfor %}
 	{% endfor %}
