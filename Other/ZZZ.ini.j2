@@ -102,7 +102,7 @@
 						; {{ entry.collection_name }}
 					{% endif %}
 					; {{ entry.name }} ({{ entry.vertex_count }})
-					DrawIndexed = {{ entry.index_count}}, {{ entry.index_offset }}, 0
+					DrawIndexed = {{ entry.index_count}}, {{ entry.index_offset }}, first_vertex
 				{% endfor %}
 			elif DRAW_TYPE == 4
 				{% for entry in part.objects if entry.vertex_count > 0 %}
@@ -110,7 +110,7 @@
 						; {{ entry.collection_name }}
 					{% endif %}
 					; {{ entry.name }} ({{ entry.vertex_count }})
-					DrawIndexedInstanced = {{ entry.index_count}}, instance_count, {{ entry.index_offset }}, 0, first_instance
+					DrawIndexedInstanced = {{ entry.index_count}}, instance_count, {{ entry.index_offset }}, first_vertex, first_instance
 				{% endfor %}
 			endif
 
