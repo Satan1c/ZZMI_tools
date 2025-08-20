@@ -96,23 +96,18 @@
 				{% endfor %}
 				run = CommandList\ZZMI\SetTextures
 			{% endif %}
-			if DRAW_TYPE == 2
-				{% for entry in part.objects if entry.vertex_count > 0 %}
-					{% if loop.previtem and loop.previtem.collection_name != entry.collection_name %}
-						; {{ entry.collection_name }}
-					{% endif %}
-					; {{ entry.name }} ({{ entry.vertex_count }})
-					DrawIndexed = {{ entry.index_count}}, {{ entry.index_offset }}, first_vertex
-				{% endfor %}
-			elif DRAW_TYPE == 4
-				{% for entry in part.objects if entry.vertex_count > 0 %}
-					{% if loop.previtem and loop.previtem.collection_name != entry.collection_name %}
-						; {{ entry.collection_name }}
-					{% endif %}
-					; {{ entry.name }} ({{ entry.vertex_count }})
-					DrawIndexedInstanced = {{ entry.index_count}}, instance_count, {{ entry.index_offset }}, first_vertex, first_instance
-				{% endfor %}
-			endif
+			{% set is_object = part.objects[0].obj.get("world", false) %}
+			{% for entry in part.objects if entry.vertex_count > 0 %}
+				{% if loop.previtem and loop.previtem.collection_name != entry.collection_name %}
+					; {{ entry.collection_name }}
+				{% endif %}
+				; {{ entry.name }} ({{ entry.vertex_count }})
+				{% if is_object %}
+					DrawIndexedInstanced = {{ entry.index_count}}, instance_count, {{ entry.index_offset }}, 0, first_instance
+				{% else %}
+					DrawIndexed = {{ entry.index_count}}, {{ entry.index_offset }}, 0
+				{%endif%}
+			{% endfor %}
 
 		{% endfor %}
 	{% endfor %}
