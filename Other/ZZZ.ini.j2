@@ -53,16 +53,10 @@
 
 		[TextureOverride {{character_name}} {{component.name}} Texcoord]
 		hash = {{ component.texcoord_vb }}
-		{% if vertex_count > 0 %}
-			match_vertex_count = {{vertex_count}}
-		{% endif %}
 		vb1 = Resource.{{component.name}}.Texcoord
 
 		[TextureOverride {{character_name}} {{component.name}} Draw]
 		hash = {{ component.draw_vb }}
-		{% if vertex_count > 0 %}
-			match_vertex_count = {{vertex_count}}
-		{% endif %}
 		override_vertex_count = {{ component.vertex_count }}
 		override_byte_stride = {{ component.strides.position }}
 
