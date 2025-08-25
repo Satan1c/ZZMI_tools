@@ -1,0 +1,267 @@
+{% extends "base.ini.j2" %}
+
+{% block constantscredit %}
+	{% if credit != "" %}
+		[Constants]
+		global $active = 0
+		global $creditinfo = 0
+
+		[Present]
+		post $active = 0
+		run = CommandListCreditInfo
+	{% endif %}
+{% endblock %}
+
+{% block commandlistscredit %}
+	{% if credit != "" %}
+		[CommandListCreditInfo]
+		if $creditinfo == 0 && $active > 0
+			pre Resource\ShaderFixes\help.ini\Notification = ResourceCreditInfo
+			pre run = CustomShader\ShaderFixes\help.ini\FormatText
+			pre $\ShaderFixes\help.ini\notification_timeout = time + 5.0
+			$creditinfo = 1
+		endif
+	{% endif %}
+{% endblock %}
+
+{% block resourcecredit %}
+	{% if credit != "" %}
+		[ResourceCreditInfo]
+		type = Buffer
+		data = "Created by {{ credit }}"
+	{% endif %}
+{% endblock %}
+
+{% block overridesbuffers %}
+	{% for component in mod_file.components if component.draw_vb != "" and component.blend_vb != "" and component.vertex_count > 0 %}
+		{% set vertex_count = component.parts[0].objects[0].obj.get("3DMigoto:VertexCount", 0) %}
+		[TextureOverride {{character_name}} {{component.name}} Blend]
+		hash = {{ component.blend_vb }}
+		{% if vertex_count > 0 %}
+			match_vertex_count = {{vertex_count}}
+		{% endif %}
+		handling = skip
+		vb2 = Resource.{{component.name}}.Blend
+		if DRAW_TYPE == 1
+			vb0 = Resource.{{component.name}}.Position
+			Draw = {{ component.vertex_count }}, 0
+			{% if credit != "" %}
+
+				$active = 1
+			{% endif %}
+		endif
+
+		[TextureOverride {{character_name}} {{component.name}} Texcoord]
+		hash = {{ component.texcoord_vb }}
+		{% if vertex_count > 0 %}
+			match_vertex_count = {{vertex_count}}
+		{% endif %}
+		vb1 = Resource.{{component.name}}.Texcoord
+
+		[TextureOverride {{character_name}} {{component.name}} Draw]
+		hash = {{ component.draw_vb }}
+		{% if vertex_count > 0 %}
+			match_vertex_count = {{vertex_count}}
+		{% endif %}
+		override_vertex_count = {{ component.vertex_count }}
+		override_byte_stride = {{ component.strides.position }}
+
+	{% endfor %}
+	{% for component in mod_file.components if component.draw_vb != "" and component.blend_vb == "" %}
+		[TextureOverride {{character_name}} {{component.name}}]
+		hash = {{ component.position_vb }}
+		vb0 = Resource.{{component.name}}
+		{% if credit != "" %}
+			$active = 1
+		{% endif %}
+
+	{% endfor %}
+{% endblock %}
+
+{% block overridesibs %}
+	{% for component in mod_file.components if component.draw_vb != "" %}
+		{% for part in component.parts if part.vertex_count > 0 %}
+			[TextureOverride {{character_name}} {{component.name}}{{part.name}}]
+			hash = {{ component.ib }}
+			match_first_index = {{ part.first_index }}
+			{% if part.index_count > 0 %}
+				match_index_count = {{part.index_count}}
+			{% endif %}
+			handling = skip
+			ib = Resource.{{component.name}}{{part.name}}.IB
+
+			{% if part.textures|length > 0%}
+				{% for texture in part.textures %}
+					Resource\ZZMI\{{ texture.name }} = ref Resource.{{component.name}}{{part.name}}.{{ texture.name }}
+				{% endfor %}
+				run = CommandList\ZZMI\SetTextures
+			{% endif %}
+
+			{% set data = [] %}
+			{% for entry in part.objects|sort(attribute='depth', reverse=True) if entry.vertex_count > 0 %}
+				{% set obj = {'name': entry.name, 'collection': entry.collection_name, 'draw': 'DrawIndexed = ' ~ entry.index_count ~ ', ' ~ entry.index_offset ~ ', 0'} %}
+				{% set _ = data.append(obj)%}
+			{% endfor %}
+			{{data}}
+
+			{% set draws = [] %}
+			{% set toggles = dict() %}
+			{% for entry in part.objects if entry.vertex_count > 0 %}
+				{% set collection_split = entry.collection_name.split('.') %}
+				{% set toggle_name = collection_split[0] if collection_split[0][0] == '$' else '' %}
+				{% set var_name = '$' ~ collection_split[-1] if collection_split[-1][0] != '$' else collection_split[-1] %}
+				{% set obj = {'name': entry.name, 'draw': 'DrawIndexed = ' ~ entry.index_count ~ ', ' ~ entry.index_offset ~ ', 0'} %}
+				{% if toggle_name != '' %}
+					{% if var_name not in toggles %}
+						{% set _ = toggles.update({var_name: {}}) %}
+					{% endif %}
+					{% if toggle_name not in toggles[var_name] %}
+						{% set _ = toggles[var_name].update({toggle_name: []}) %}
+					{% endif %}
+					{% set _ = toggles[var_name][toggle_name].append(obj) %}
+				{% else %}
+					{% set _ = draws.append(obj) %}
+				{%endif%}
+			{% endfor %}
+			; {{draws}}
+			; {{toggles}}
+			{% for draw in draws %}
+				; {{draw.name}}
+				{{draw.draw}}
+			{% endfor %}
+
+			{% for variable, toggle in toggles.items() %}
+				{% if toggle.keys()|length > 0 %}
+					if {{variable}}
+						{% for toggle_variable, toggle_data in toggle.items() %}
+							{% if variable == toggle_variable %}
+								{% if toggle_data|length == 1 %}
+										; {{toggle_data[0].name}}
+										{{toggle_data[0].draw}}
+								{% elif toggle_data|length == 2 %}
+										; {{toggle_data[1].name}}
+										{{toggle_data[1].draw}}
+									else
+										; {{toggle_data[0].name}}
+										{{toggle_data[0].draw}}
+								{% else %}
+
+								{% endif %}
+							{% else %}
+								{% if toggle_data|length == 1 %}
+									if {{toggle_variable}}
+										; {{toggle_data[0].name}}
+										{{toggle_data[0].draw}}
+									endif
+								{% elif toggle_data|length == 2 %}
+									if {{toggle_variable}}
+										; {{toggle_data[1].name}}
+										{{toggle_data[1].draw}}
+									else
+										; {{toggle_data[0].name}}
+										{{toggle_data[0].draw}}
+									endif
+								{% endif %}
+							{% endif %}
+						{% endfor %}
+					endif
+
+				{% endif %}
+			{% endfor %}
+		{% endfor %}
+	{% endfor %}
+	{% for component in mod_file.components if component.draw_vb == "" and component.position_vb == "" %}
+		{% set count = component.parts | selectattr('textures') | list | length %}
+		{% for part in component.parts %}
+			{% if part.textures|length > 0 %}
+				{% if count > 1 %}
+					[TextureOverride {{character_name}} {{component.name}}{{part.name}}]
+					hash = {{component.ib}}
+					match_first_index = {{ part.first_index }}
+					{% if part.index_count > 0 %}
+						match_index_count = {{part.index_count}}
+					{% endif %}
+				{% else %}
+				[TextureOverride {{character_name}} {{component.name}} IB]
+				hash = {{component.ib}}
+				{% endif %}
+				{% for texture in part.textures %}
+					Resource\ZZMI\{{ texture.name }} = ref Resource.{{component.name}}{{part.name}}.{{ texture.name }}
+				{% endfor %}
+				run = CommandList\ZZMI\SetTextures
+
+			{%endif%}
+		{% endfor %}
+	{% endfor %}
+{% endblock  %}
+
+{% block resourcebuffers %}
+	{% for component in mod_file.components if component.draw_vb != "" and component.blend_vb != ""  and component.vertex_count > 0 %}
+		{% if component.strides %}
+			[Resource.{{component.name}}.Position]
+			type = Buffer
+			stride = {{ component.strides.position }}
+			filename = {{ component.fullname }}Position.buf
+
+			[Resource.{{component.name}}.Blend]
+			type = Buffer
+			stride = {{ component.strides.blend }}
+			filename = {{ component.fullname }}Blend.buf
+
+			[Resource.{{component.name}}.Texcoord]
+			type = Buffer
+			stride = {{ component.strides.texcoord }}
+			filename = {{ component.fullname }}Texcoord.buf
+		{% endif %}
+		{% for part in component.parts %}
+			[Resource.{{component.name}}{{part.name}}.IB]
+			type = Buffer
+			format = DXGI_FORMAT_R32_UINT
+			filename = {{ part.fullname }}.ib
+		{% endfor %}
+	{% endfor %}
+	{% for component in mod_file.components if component.draw_vb != "" and component.blend_vb == "" and component.vertex_count > 0 %}
+		{% if component.strides %}
+			[Resource.{{component.name}}]
+			type = Buffer
+			stride = {{ component.strides.position }}
+			filename = {{ component.fullname }}.buf
+		{% endif %}
+		{% for part in component.parts %}
+			[Resource.{{component.name}}{{part.name}}.IB]
+			type = Buffer
+			format = DXGI_FORMAT_R32_UINT
+			filename = {{ part.fullname }}.ib
+		{% endfor %}
+	{% endfor %}
+{% endblock %}
+
+{% block resourcetextures %}
+	{% for component in mod_file.components %}
+		{% for part in component.parts %}
+			{% for texture in part.textures %}
+				[Resource.{{component.name}}{{part.name}}.{{ texture.name }}]
+				filename = {{ part.fullname }}{{ texture.name }}{{ texture.extension }}
+			{% endfor %}
+		{% endfor %}
+	{% endfor %}
+{% endblock %}
+
+{% block constants %}
+	{{- self.constantscredit() -}}
+{% endblock %}
+
+{% block overrides %}
+	{{- self.overridesbuffers() -}}
+	{{- self.overridesibs() -}}
+{% endblock %}
+
+{% block commandlists %}
+	{{- self.commandlistscredit() -}}
+{% endblock %}
+
+{% block resources %}
+	{{- self.resourcebuffers() -}}
+	{{- self.resourcetextures() -}}
+	{{- self.resourcecredit() -}}
+{% endblock %}
