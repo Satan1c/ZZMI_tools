@@ -44,7 +44,7 @@
 		vb2 = Resource.{{component.name}}.Blend
 		if DRAW_TYPE == 1
 			vb0 = Resource.{{component.name}}.Position
-			draw = {{ component.vertex_count }}, 0
+			Draw = {{ component.vertex_count }}, 0
 			{% if credit != "" %}
 
 				$active = 1
@@ -53,16 +53,10 @@
 
 		[TextureOverride {{character_name}} {{component.name}} Texcoord]
 		hash = {{ component.texcoord_vb }}
-		{% if vertex_count > 0 %}
-			match_vertex_count = {{vertex_count}}
-		{% endif %}
 		vb1 = Resource.{{component.name}}.Texcoord
 
 		[TextureOverride {{character_name}} {{component.name}} Draw]
 		hash = {{ component.draw_vb }}
-		{% if vertex_count > 0 %}
-			match_vertex_count = {{vertex_count}}
-		{% endif %}
 		override_vertex_count = {{ component.vertex_count }}
 		override_byte_stride = {{ component.strides.position }}
 
@@ -96,14 +90,38 @@
 				{% endfor %}
 				run = CommandList\ZZMI\SetTextures
 			{% endif %}
-			{% for entry in part.objects if entry.vertex_count > 0 %}
-				{% if loop.previtem and loop.previtem.collection_name != entry.collection_name %}
-					; {{ entry.collection_name }}
-				{% endif %}
-				; {{ entry.name }} ({{ entry.vertex_count }})
-				drawindexed = {{ entry.index_count}}, {{ entry.index_offset }}, 0
-			{% endfor %}
-
+			{% set draw_mode = part.objects[0].obj.get("draw_mode", "indexed") %}
+			{% if draw_mode == "mixed" %}
+				if DRAW_TYPE == 2
+					{% for entry in part.objects if entry.vertex_count > 0 %}
+						{% if loop.previtem and loop.previtem.collection_name != entry.collection_name %}
+							; {{ entry.collection_name }}
+						{% endif %}
+						; {{ entry.name }} ({{ entry.vertex_count }})
+						DrawIndexed = {{ entry.index_count}}, {{ entry.index_offset }}, 0
+					{% endfor %}
+				elif DRAW_TYPE == 4
+					{% for entry in part.objects if entry.vertex_count > 0 %}
+						{% if loop.previtem and loop.previtem.collection_name != entry.collection_name %}
+							; {{ entry.collection_name }}
+						{% endif %}
+						; {{ entry.name }} ({{ entry.vertex_count }})
+						DrawIndexedInstanced = {{ entry.index_count}}, instance_count, {{ entry.index_offset }}, 0, first_instance
+					{% endfor %}
+				endif
+			{% else %}
+				{% for entry in part.objects if entry.vertex_count > 0 %}
+					{% if loop.previtem and loop.previtem.collection_name != entry.collection_name %}
+						; {{ entry.collection_name }}
+					{% endif %}
+					; {{ entry.name }} ({{ entry.vertex_count }})
+					{% if draw_mode == "indexed" %}
+						DrawIndexed = {{ entry.index_count}}, {{ entry.index_offset }}, 0
+					{% elif draw_mode == "instanced" %}
+						DrawIndexedInstanced = {{ entry.index_count}}, instance_count, {{ entry.index_offset }}, 0, first_instance
+					{%endif%}
+				{% endfor %}
+			{%endif%}
 		{% endfor %}
 	{% endfor %}
 	{% for component in mod_file.components if component.draw_vb == "" and component.position_vb == "" %}
