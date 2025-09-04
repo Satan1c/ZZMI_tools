@@ -11,7 +11,7 @@ return;
 
 static IEnumerable<FileInfo> EnumerateIniFiles()
 {
-    return Directory.EnumerateFiles(".", "*.ini", SearchOption.AllDirectories).AsParallel().Select(p => new FileInfo(p));
+    return Directory.EnumerateFiles(".", "*.ini", SearchOption.AllDirectories).Select(p => new FileInfo(p));
 }
 
 static IEnumerable<FileInfo> ExtractResourceFiles(FileInfo ini, string blendHash, string positionHash)
