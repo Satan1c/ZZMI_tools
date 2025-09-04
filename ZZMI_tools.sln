@@ -14,6 +14,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibraryTest", "LibraryTest\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SlotsFixApplier", "SlotsFixApplier\SlotsFixApplier.csproj", "{D517242A-625D-4EB1-A65D-66A1CF7704B0}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VgRemapper", "VgRemapper\VgRemapper.csproj", "{E36A30AC-CE94-4FD3-86CA-818F6F11D9D4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -48,5 +50,9 @@ Global
 		{D517242A-625D-4EB1-A65D-66A1CF7704B0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D517242A-625D-4EB1-A65D-66A1CF7704B0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D517242A-625D-4EB1-A65D-66A1CF7704B0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E36A30AC-CE94-4FD3-86CA-818F6F11D9D4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E36A30AC-CE94-4FD3-86CA-818F6F11D9D4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E36A30AC-CE94-4FD3-86CA-818F6F11D9D4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E36A30AC-CE94-4FD3-86CA-818F6F11D9D4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

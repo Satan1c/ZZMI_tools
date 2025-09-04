@@ -1,0 +1,190 @@
+// csharp
+using System.Buffers;
+using System.Collections.Concurrent;
+using System.Runtime.CompilerServices;
+
+const int blockSize = 32;
+const int ioBufferSize = 1 << 20; // 1MB
+const string resPrefix = "Resource";
+
+return;
+
+static IEnumerable<FileInfo> EnumerateIniFiles()
+{
+    return Directory.EnumerateFiles(".", "*.ini", SearchOption.AllDirectories).AsParallel().Select(p => new FileInfo(p));
+}
+
+static IEnumerable<FileInfo> ExtractResourceFiles(FileInfo ini, string blendHash, string positionHash)
+{
+    // Single-pass parse: collect resource names referenced by vb2, and map [ResourceX] -> filename
+    var wantedHashes = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+    {
+        blendHash, positionHash
+    };
+    var referencedResources = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+    var fileByResource = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+
+    string? currentSection = null;
+
+    foreach (var raw in File.ReadLines(ini.FullName))
+    {
+        if (string.IsNullOrWhiteSpace(raw)) continue;
+        var line = raw.AsSpan().Trim();
+        var eq = 0;
+
+        // Section header: [ResourceName]
+        if (line.Length > 2 && line[0] == '[' && line[^1] == ']')
+        {
+            var content = line.Slice(1, line.Length - 2).Trim(); // drop [ ]
+            currentSection = content.StartsWith(resPrefix, StringComparison.OrdinalIgnoreCase)
+                ? content[resPrefix.Length..].Trim().ToString()
+                : null;
+            continue;
+        }
+
+        // filename=...
+        if (currentSection is not null && StartsWithIgnoreCase(line, "filename"))
+        {
+            eq = line.IndexOf('=');
+            if (eq > 0)
+            {
+                var path = line[(eq + 1)..].Trim().ToString();
+                fileByResource[currentSection] = path;
+            }
+
+            continue;
+        }
+
+        // hash=XXXXXXXX (collect only when it matches the target set)
+        if (StartsWithIgnoreCase(line, "hash"))
+        {
+            eq = line.IndexOf('=');
+            if (eq > 0)
+            {
+                var hash = line[(eq + 1)..].Trim().ToString();
+                // Optional early-exit or flagging if you need to gate "vb2" collection by hash presence.
+                _ = wantedHashes.Contains(hash);
+            }
+
+            continue;
+        }
+
+        // vb2=Resource<Name>
+        if (!StartsWithIgnoreCase(line, "vb2")) continue;
+
+
+        eq = line.IndexOf('=');
+        if (eq <= 0) continue;
+        var value = line[(eq + 1)..].Trim();
+        
+        if (!value.StartsWith(resPrefix, StringComparison.OrdinalIgnoreCase)) continue;
+        var name = value[resPrefix.Length..].Trim().ToString();
+        if (!string.IsNullOrEmpty(name)) referencedResources.Add(name);
+
+    }
+
+    // Map referenced resource names to full file paths (relative to the ini directory)
+    var baseDir = ini.Directory?.FullName ?? Directory.GetCurrentDirectory();
+    foreach (var name in referencedResources)
+    {
+        if (!fileByResource.TryGetValue(name, out var rel)) continue;
+        var full = Path.GetFullPath(Path.Join(baseDir, rel));
+        yield return new FileInfo(full);
+    }
+
+    yield break;
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    static bool StartsWithIgnoreCase(ReadOnlySpan<char> span, string prefix)
+        => span.Length >= prefix.Length && span.StartsWith(prefix, StringComparison.OrdinalIgnoreCase);
+}
+
+static void Remap(FileInfo file, ReadOnlySpan<int> oldIndexes, ReadOnlySpan<int> newIndexes)
+{
+    if (!file.Exists) return;
+
+    var length = file.Length;
+    if (length % blockSize != 0)
+        throw new InvalidOperationException($"File `{file.FullName}` size is not a multiple of {blockSize}.");
+
+    var blockCount = checked((int)(length / blockSize));
+    if (oldIndexes.Length != blockCount || newIndexes.Length != blockCount)
+        throw new ArgumentException("Index arrays must match the number of 32-byte blocks.");
+
+    var src = ArrayPool<byte>.Shared.Rent((int)length);
+    var dst = ArrayPool<byte>.Shared.Rent((int)length);
+
+    try
+    {
+        using (var fs = new FileStream(file.FullName, new FileStreamOptions
+        {
+            Access = FileAccess.Read,
+            Mode = FileMode.Open,
+            Options = FileOptions.SequentialScan,
+            BufferSize = ioBufferSize,
+            Share = FileShare.Read
+        }))
+        {
+            var read = fs.Read(src, 0, (int)length);
+            if (read != length) throw new IOException("Failed to read full file.");
+        }
+
+        var srcSpan = src.AsSpan(0, (int)length);
+        var dstSpan = dst.AsSpan(0, (int)length);
+
+        // Remap by copying 32-byte blocks
+        for (var i = 0; i < blockCount; i++)
+        {
+            var from = newIndexes[i];
+            var to = oldIndexes[i];
+            srcSpan.Slice(from * blockSize, blockSize).CopyTo(dstSpan.Slice(to * blockSize, blockSize));
+        }
+
+        // Backup then write new data
+        var dir = file.Directory!.FullName;
+        var name = file.Name;
+        var backup = Path.Join(dir, $"{name}_remap_backup_{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}");
+        File.Move(file.FullName, backup);
+
+        using var outFs = new FileStream(Path.Join(dir, name), new FileStreamOptions
+        {
+            Access = FileAccess.Write,
+            Mode = FileMode.CreateNew,
+            Options = FileOptions.WriteThrough | FileOptions.SequentialScan,
+            BufferSize = ioBufferSize,
+            Share = FileShare.None
+        });
+        outFs.Write(dstSpan);
+    }
+    finally
+    {
+        ArrayPool<byte>.Shared.Return(src);
+        ArrayPool<byte>.Shared.Return(dst, clearArray: false);
+    }
+}
+
+// Orchestrate: parse all .ini files in parallel, dedupe targets, then remap.
+static void Run(string blendHash, string positionHash, ReadOnlySpan<int> oldIdx, ReadOnlySpan<int> newIdx)
+{
+    var iniFiles = EnumerateIniFiles();
+
+    var found = new ConcurrentDictionary<string, byte>(StringComparer.OrdinalIgnoreCase);
+
+    Parallel.ForEach(
+        iniFiles,
+        new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount },
+        ini =>
+        {
+            foreach (var rf in ExtractResourceFiles(ini, blendHash, positionHash))
+            {
+                // Deduplicate by full path
+                found.TryAdd(rf.FullName, 0);
+            }
+        });
+
+    foreach (var path in found.Keys)
+        Remap(new FileInfo(path), oldIdx, newIdx);
+}
+
+// Example call (ensure hashes and index maps are set):
+// Run(BlendHash, PositionHash, s_oldIndexes, s_newIndexes);
