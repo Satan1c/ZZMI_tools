@@ -13,7 +13,7 @@
 
 	<PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
 	  <CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
-	  <PlatformTarget>x64</PlatformTarget>
+	  <PlatformTarget>ARM64</PlatformTarget>
 	  <DebugType>none</DebugType>
 	  <WarningLevel>0</WarningLevel>
 	</PropertyGroup>

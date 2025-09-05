@@ -5,11 +5,12 @@ using System.Text;
 using System.Text.RegularExpressions;
 
 Directory.SetCurrentDirectory("/Users/oleksandr.fedotov/Downloads/BelleSummerSkinMod/");
-var inis = Directory.EnumerateFiles(Directory.GetCurrentDirectory(), "*.ini").Select(x => new FileInfo(x)).ToArray();
+var inis = Directory
+	.EnumerateFiles(Directory.GetCurrentDirectory(), "*.ini")
+	.Select(x => new FileInfo(x))
+	.ToArray();
 
-var total = Stopwatch.GetTimestamp();
-
-var linesStart = Stopwatch.GetTimestamp();
+var startTime = Stopwatch.GetTimestamp();
 var linesTasks = new Task<(string lines, string[] separateLines)>[inis.Length];
 for (var i = 0; i < inis.Length; i++) linesTasks[i] = GetIniLines(inis[i]);
 await Task.WhenAll(linesTasks);
@@ -18,31 +19,33 @@ var lines = linesTasks
 	.Select(t => t.Result)
 	.ToArray();
 linesTasks = null;
-var linesEnd = Stopwatch.GetTimestamp();
 
-var resourceNamesStart = Stopwatch.GetTimestamp();
+Console.WriteLine($"Lines parsed in {Stopwatch.GetElapsedTime(startTime)}");
+
+startTime = Stopwatch.GetTimestamp();
 var resourceNames = new ReadOnlyDictionary<string, string[]>[lines.Length];
 for (var i = 0; i < lines.Length; i++) resourceNames[i] = GetResourceNames(lines[i].separateLines);
-var resourceNamesEnd = Stopwatch.GetTimestamp();
 
-var resourceFilesStart = Stopwatch.GetTimestamp();
+Console.WriteLine($"Resource names extracted in {Stopwatch.GetElapsedTime(startTime)}");
+
+startTime = Stopwatch.GetTimestamp();
 var resourceFiles = new ReadOnlyDictionary<string, FileInfo[]>[resourceNames.Length];
 for (var i = 0; i < resourceNames.Length; i++) resourceFiles[i] = GetResourceFiles(resourceNames[i], lines[i].lines);
-var resourceFilesEnd = Stopwatch.GetTimestamp();
 
-var remapStart = Stopwatch.GetTimestamp();
+Console.WriteLine($"Resource files mapped in {Stopwatch.GetElapsedTime(startTime)}");
+
+startTime = Stopwatch.GetTimestamp();
 foreach (var (hash, files) in resourceFiles
 	         .SelectMany(x => x.Select(y => (y.Key, y.Value))))
-foreach (var file in files)
-	Remap(hash, file);
-var remapEnd = Stopwatch.GetTimestamp();
+{
+	// Run remaps in parallel, dedupe files referenced by multiple INIs
+	var tasks = new List<Task>(files.Length);
+	var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+	tasks.AddRange(from file in files where seen.Add(file.FullName) select Task.Run(() => Remap(hash, file)));
+	await Task.WhenAll(tasks);
+}
 
-var totalEnd = Stopwatch.GetTimestamp();
-Console.WriteLine($"Lines parsed in {Stopwatch.GetElapsedTime(linesStart, linesEnd)}");
-Console.WriteLine($"Resource names extracted in {Stopwatch.GetElapsedTime(resourceNamesStart,  resourceNamesEnd)}");
-Console.WriteLine($"Resource files mapped in {Stopwatch.GetElapsedTime(resourceFilesStart, resourceFilesEnd)}");
-Console.WriteLine($"Remaps completed in {Stopwatch.GetElapsedTime(remapStart, remapEnd)}");
-Console.WriteLine($"Total {Stopwatch.GetElapsedTime(total, totalEnd)}");
+Console.WriteLine($"Remaps completed in {Stopwatch.GetElapsedTime(startTime)}");
 
 public static partial class Program
 {
@@ -75,9 +78,7 @@ public static partial class Program
 		}.ToFrozenDictionary();
 
 	private static readonly Regex s_hashRegex = MyRegex();
-
 	private static readonly Regex s_blendResourceNameRegex = MyRegex1();
-
 	private static readonly Regex s_blendResourceRegex = MyRegex2();
 
 	[GeneratedRegex(@"^[ \t]*hash\s*=\s*(?<Hash>\w{8})",
@@ -135,21 +136,36 @@ public static partial class Program
 	private static ReadOnlyDictionary<string, FileInfo[]> GetResourceFiles(
 		IReadOnlyDictionary<string, string[]> namesMap, string lines)
 	{
+		// Precompute Resource(Name) -> [FileInfos] once per INI
+		var nameToFiles = new Dictionary<string, List<FileInfo>>(StringComparer.Ordinal);
+		foreach (Match match in s_blendResourceRegex.Matches(lines))
+		{
+			var name = match.Groups["Name"].Value;
+			var path = Path.Combine(Directory.GetCurrentDirectory(), match.Groups["File"].Value);
+			var fi = new FileInfo(path);
+			if (!fi.Exists) continue;
+
+			if (!nameToFiles.TryGetValue(name, out var list))
+			{
+				list = new List<FileInfo>(1);
+				nameToFiles[name] = list;
+			}
+			list.Add(fi);
+		}
+
 		var resourceFilesMap = new Dictionary<string, FileInfo[]>();
 		foreach (var (hash, names) in namesMap)
 		{
-			var resourceFiles = new LinkedList<FileInfo>();
-			foreach (Match match in s_blendResourceRegex.Matches(lines))
+			// Merge and dedupe by full path per hash
+			var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+			var list = new List<FileInfo>(names.Length);
+			foreach (var name in names)
 			{
-				if (!names.Contains(match.Groups["Name"].Value)) continue;
-				var path = Path.Combine(Directory.GetCurrentDirectory(), match.Groups["File"].Value);
-				resourceFiles.AddLast(new FileInfo(path));
+				if (!nameToFiles.TryGetValue(name, out var files)) continue;
+				list.AddRange(files.Where(fi => seen.Add(fi.FullName)));
 			}
-
-			resourceFilesMap[hash] = resourceFiles.Where(x => x.Exists).ToArray();
+			resourceFilesMap[hash] = list.ToArray();
 		}
-
-
 		return new ReadOnlyDictionary<string, FileInfo[]>(resourceFilesMap);
 	}
 
@@ -170,18 +186,37 @@ public static partial class Program
 
 		var (oldIndexes, newIndexes) = s_blendMappings[hash];
 
-		var srcBytes = ReadBuffer(file).AsSpan();
-		var destBytes = new byte[file.Length / Stride][].AsSpan();
-		srcBytes.CopyTo(destBytes);
+		var rowCount = checked((int)(file.Length / Stride));
+		// Validate indices
 		for (var i = 0; i < newIndexes.Length; i++)
-			destBytes[newIndexes[i]] = srcBytes[oldIndexes[i]];
+		{
+			var srcRow = oldIndexes[i].GetOffset(rowCount);
+			var dstRow = newIndexes[i].GetOffset(rowCount);
+			if ((uint)srcRow >= (uint)rowCount || (uint)dstRow >= (uint)rowCount)
+				throw new IndexOutOfRangeException($"Remap index out of range: src={srcRow}, dst={dstRow}, rows={rowCount}");
+		}
 
+		// Read entire file once
+		var src = File.ReadAllBytes(file.FullName);
+		var dest = new byte[src.Length];
+		Buffer.BlockCopy(src, 0, dest, 0, src.Length);
+
+		for (var i = 0; i < newIndexes.Length; i++)
+		{
+			var srcRow = oldIndexes[i].GetOffset(rowCount);
+			var dstRow = newIndexes[i].GetOffset(rowCount);
+			if (srcRow == dstRow) continue;
+
+			var srcSlice = src.AsSpan(srcRow * Stride, Stride);
+			var dstSlice = dest.AsSpan(dstRow * Stride, Stride);
+			srcSlice.CopyTo(dstSlice);
+		}
+
+		// Backup and write updated file
 		var backupPath = Path.Combine(file.Directory!.FullName,
 			$"{file.Name}_remap_backup_{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}");
-		file.CopyTo(backupPath);
+		File.Copy(file.FullName, backupPath);
 
-		using var writeStream = file.OpenWrite();
-		using var writer = new BinaryWriter(writeStream, Encoding.ASCII, false);
-		foreach (var b in destBytes) writer.Write(b);
+		File.WriteAllBytes(file.FullName, dest);
 	}
 }
