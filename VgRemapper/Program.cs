@@ -1,15 +1,10 @@
 ﻿using System.Collections.Frozen;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
-using System.Text;
 using System.Text.RegularExpressions;
 
-Directory.SetCurrentDirectory("/Users/oleksandr.fedotov/Downloads/BelleSummerSkinMod/");
 var inis = Directory.EnumerateFiles(Directory.GetCurrentDirectory(), "*.ini").Select(x => new FileInfo(x)).ToArray();
 
-var total = Stopwatch.GetTimestamp();
-
-var linesStart = Stopwatch.GetTimestamp();
 var linesTasks = new Task<(string lines, string[] separateLines)>[inis.Length];
 for (var i = 0; i < inis.Length; i++) linesTasks[i] = GetIniLines(inis[i]);
 await Task.WhenAll(linesTasks);
@@ -17,53 +12,59 @@ await Task.WhenAll(linesTasks);
 var lines = linesTasks
 	.Select(t => t.Result)
 	.ToArray();
-linesTasks = null;
-var linesEnd = Stopwatch.GetTimestamp();
 
-var resourceNamesStart = Stopwatch.GetTimestamp();
+var total = Stopwatch.GetTimestamp();
+
 var resourceNames = new ReadOnlyDictionary<string, string[]>[lines.Length];
 for (var i = 0; i < lines.Length; i++) resourceNames[i] = GetResourceNames(lines[i].separateLines);
-var resourceNamesEnd = Stopwatch.GetTimestamp();
 
-var resourceFilesStart = Stopwatch.GetTimestamp();
 var resourceFiles = new ReadOnlyDictionary<string, FileInfo[]>[resourceNames.Length];
 for (var i = 0; i < resourceNames.Length; i++) resourceFiles[i] = GetResourceFiles(resourceNames[i], lines[i].lines);
-var resourceFilesEnd = Stopwatch.GetTimestamp();
 
-var remapStart = Stopwatch.GetTimestamp();
-foreach (var (hash, files) in resourceFiles
-	         .SelectMany(x => x.Select(y => (y.Key, y.Value))))
-foreach (var file in files)
-	Remap(hash, file);
-var remapEnd = Stopwatch.GetTimestamp();
+var timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+foreach (var (hash, files) in resourceFiles.SelectMany(x => x.Select(y => (y.Key, y.Value))))
+{
+	foreach (var file in files)
+	{
+		Remap(hash, file, timestamp);
+	}
+}
 
-var totalEnd = Stopwatch.GetTimestamp();
-Console.WriteLine($"Lines parsed in {Stopwatch.GetElapsedTime(linesStart, linesEnd)}");
-Console.WriteLine($"Resource names extracted in {Stopwatch.GetElapsedTime(resourceNamesStart,  resourceNamesEnd)}");
-Console.WriteLine($"Resource files mapped in {Stopwatch.GetElapsedTime(resourceFilesStart, resourceFilesEnd)}");
-Console.WriteLine($"Remaps completed in {Stopwatch.GetElapsedTime(remapStart, remapEnd)}");
-Console.WriteLine($"Total {Stopwatch.GetElapsedTime(total, totalEnd)}");
+Console.WriteLine($"Total {Stopwatch.GetElapsedTime(total)}");
+GC.Collect(GC.MaxGeneration, GCCollectionMode.Aggressive, true, true);
+Console.ReadKey();
 
 public static partial class Program
 {
 	private const byte Stride = 32;
 
-	private static readonly FrozenDictionary<string, (Index[] oldIndexes, Index[] newIndexes)> s_blendMappings =
-		new Dictionary<string, (Index[] oldIndexes, Index[] newIndexes)>
+	private static readonly FrozenDictionary<string, Func<uint, uint>> s_blendMappings =
+		new Dictionary<string, Func<uint, uint>>
 		{
 			{
 				"4f3ddd5c",
-				(
-					[9, 10],
-					[10, 9]
-				)
+				i => i switch
+				{
+					9 => 10,
+					10 => 9,
+					_ => i
+				}
 			},
 			{
 				"0139f7e8",
-				(
-					[5, 6, 9, 10, 11, 12, 13, 14, 15],
-					[9, 5, 10, 11, 12, 13, 14, 15, 6]
-				)
+				i => i switch
+				{
+					5 => 9,
+					6 => 5,
+					9 => 10,
+					10 => 11,
+					11 => 12,
+					12 => 13,
+					13 => 14,
+					14 => 15,
+					15 => 6,
+					_ => i
+				}
 			}
 		}.ToFrozenDictionary();
 
@@ -74,31 +75,27 @@ public static partial class Program
 			{ "324d9d21", "0139f7e8" }
 		}.ToFrozenDictionary();
 
+	[GeneratedRegex(@"^[ \t]*hash\s*=\s*(?<Hash>\w{8})", RegexOptions.IgnoreCase | RegexOptions.Multiline | RegexOptions.Compiled)]
+	private static partial Regex MyRegex();
 	private static readonly Regex s_hashRegex = MyRegex();
 
+	[GeneratedRegex(@"^[ \t]*vb2\s*=\s*(?:Resource(?<Name>.*))", RegexOptions.IgnoreCase | RegexOptions.Multiline | RegexOptions.Compiled)]
+	private static partial Regex MyRegex1();
 	private static readonly Regex s_blendResourceNameRegex = MyRegex1();
 
-	private static readonly Regex s_blendResourceRegex = MyRegex2();
-
-	[GeneratedRegex(@"^[ \t]*hash\s*=\s*(?<Hash>\w{8})",
-		RegexOptions.IgnoreCase | RegexOptions.Multiline | RegexOptions.Compiled)]
-	private static partial Regex MyRegex();
-
-	[GeneratedRegex(@"^[ \t]*vb2\s*=\s*(?:Resource(?<Name>.*))",
-		RegexOptions.IgnoreCase | RegexOptions.Multiline | RegexOptions.Compiled)]
-	private static partial Regex MyRegex1();
-
-	[GeneratedRegex(
-		@"^[ \t]*\[Resource(?<Name>.*)\]$\s^[ \t]*type\s*=\s*Buffer$\s^[ \t]*stride\s*=\s*32$\s^[ \t]*filename\s*=\s*(?<File>.+)$",
-		RegexOptions.IgnoreCase | RegexOptions.Multiline | RegexOptions.Compiled)]
+	[GeneratedRegex(@"^[ \t]*\[Resource(?<Name>.*)\]$\s^[ \t]*type\s*=\s*Buffer$\s^[ \t]*stride\s*=\s*32$\s^[ \t]*filename\s*=\s*(?<File>.+)$", RegexOptions.IgnoreCase | RegexOptions.Multiline | RegexOptions.Compiled)]
 	private static partial Regex MyRegex2();
+	private static readonly Regex s_blendResourceRegex = MyRegex2();
 
 	private static async Task<(string lines, string[] separateLines)> GetIniLines(FileInfo file)
 	{
 		await using var readStream = file.OpenRead();
 		using var reader = new StreamReader(readStream, leaveOpen: false);
+		
 		var lines = await reader.ReadToEndAsync();
-		return (lines, lines.Split(Environment.NewLine));
+		var separatedLines = lines.Split(Environment.NewLine).Select(x => x.Trim()).Where(x => !string.IsNullOrEmpty(x)).ToArray();
+		
+		return (string.Join('\n', separatedLines), separatedLines);
 	}
 
 	private static ReadOnlyDictionary<string, string[]> GetResourceNames(string[] lines)
@@ -108,28 +105,33 @@ public static partial class Program
 		for (var i = 0; i < lines.Length; i++)
 		{
 			var line = lines[i];
+			if (line.AsSpan().TrimStart().StartsWith('[')) continue;
+			
 			var hashMatch = s_hashRegex.Match(line);
 			if (!hashMatch.Success) continue;
 
 			var hash = hashMatch.Groups["Hash"].Value;
 			if (!s_blendMappings.ContainsKey(hash) && !s_positionToBlend.TryGetValue(hash, out hash)) continue;
-			if (line.TrimStart().StartsWith('[')) continue;
-
+			
 			var resourceNames = new LinkedList<string>();
-			for (var j = i + 1; j < lines.Length; j++)
+			var j = i;
+			for (; j < lines.Length; j++, i++)
 			{
 				var nextLine = lines[j];
-				if (nextLine.TrimStart().StartsWith('[')) break;
+				if (nextLine.AsSpan().TrimStart().StartsWith('[')) break;
+				
 				var bledResourceNameMatch = s_blendResourceNameRegex.Match(nextLine);
 				if (!bledResourceNameMatch.Success) continue;
+				
 				resourceNames.AddLast(bledResourceNameMatch.Groups["Name"].Value);
+				
 				break;
 			}
 
 			resourceNamesMap[hash] = resourceNames.ToArray();
 		}
 
-		return new ReadOnlyDictionary<string, string[]>(resourceNamesMap);
+		return resourceNamesMap.AsReadOnly();
 	}
 
 	private static ReadOnlyDictionary<string, FileInfo[]> GetResourceFiles(
@@ -148,40 +150,38 @@ public static partial class Program
 
 			resourceFilesMap[hash] = resourceFiles.Where(x => x.Exists).ToArray();
 		}
-
-
-		return new ReadOnlyDictionary<string, FileInfo[]>(resourceFilesMap);
+		
+		return resourceFilesMap.AsReadOnly();
 	}
 
-	private static byte[][] ReadBuffer(FileInfo file)
+	private static byte[] bytes = [];
+	private static void Remap(string hash, FileInfo file, long timestamp)
 	{
-		using var readStream = file.OpenRead();
-		using var reader = new BinaryReader(readStream, Encoding.ASCII, false);
-		var buffer = new byte[file.Length / Stride][];
-		for (var i = 0; i < buffer.Length; i++) buffer[i] = reader.ReadBytes(Stride);
+		bytes = File.ReadAllBytes(file.FullName);
+		var data = Enumerable.Range(0, (int)(file.Length / Stride)).AsParallel().SelectMany(x =>
+		{
+			var group = x * Stride;
+			var weights = Enumerable.Range(0, 4).SelectMany(y =>
+			{
+				var i = group + y * 4;
+				var w = BitConverter.ToSingle(bytes.AsSpan()[new Range(i, i + 4)]);
+				return BitConverter.GetBytes(w);
+			});
+			var indices = Enumerable.Range(0, 4).SelectMany(y =>
+			{
+				var i = group + y * 4 + 16;
+				var index = BitConverter.ToUInt32(bytes.AsSpan()[new Range(i, i + 4)]);
+				index = s_blendMappings[hash](index);
+				return BitConverter.GetBytes(index);
+			});
+			return weights.Concat(indices).ToArray();
+		}).ToArray().AsSpan();
 
-		return buffer;
-	}
-
-	private static void Remap(string hash, FileInfo file)
-	{
-		if (file.Length % Stride != 0)
-			throw new InvalidDataException($"File size is not a multiple of the {Stride}-byte stride.");
-
-		var (oldIndexes, newIndexes) = s_blendMappings[hash];
-
-		var srcBytes = ReadBuffer(file).AsSpan();
-		var destBytes = new byte[file.Length / Stride][].AsSpan();
-		srcBytes.CopyTo(destBytes);
-		for (var i = 0; i < newIndexes.Length; i++)
-			destBytes[newIndexes[i]] = srcBytes[oldIndexes[i]];
-
-		var backupPath = Path.Combine(file.Directory!.FullName,
-			$"{file.Name}_remap_backup_{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}");
-		file.CopyTo(backupPath);
-
-		using var writeStream = file.OpenWrite();
-		using var writer = new BinaryWriter(writeStream, Encoding.ASCII, false);
-		foreach (var b in destBytes) writer.Write(b);
+		var name = file.Name;
+		var path = file.FullName;
+		var directory = file.Directory!.FullName;
+		file.CopyTo(Path.Combine(directory, $"remap_backup_{name}_{timestamp}"));
+		File.WriteAllBytes(path, data);
+		bytes = [];
 	}
 }
