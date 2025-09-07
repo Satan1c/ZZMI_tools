@@ -3,7 +3,14 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
 
-var inis = Directory.EnumerateFiles(Directory.GetCurrentDirectory(), "*.ini").Select(x => new FileInfo(x)).ToArray();
+var total = Stopwatch.GetTimestamp();
+var inis = Directory.EnumerateFiles(Directory.GetCurrentDirectory(), "*.ini", SearchOption.TopDirectoryOnly).Select(x => new FileInfo(x)).ToArray();
+
+if (inis.Length < 1)
+{
+	Console.WriteLine("No ini files found.");
+	goto end;
+}
 
 var linesTasks = new Task<(string lines, string[] separateLines)>[inis.Length];
 for (var i = 0; i < inis.Length; i++) linesTasks[i] = GetIniLines(inis[i]);
@@ -13,13 +20,25 @@ var lines = linesTasks
 	.Select(t => t.Result)
 	.ToArray();
 
-var total = Stopwatch.GetTimestamp();
+total = Stopwatch.GetTimestamp();
 
 var resourceNames = new ReadOnlyDictionary<string, string[]>[lines.Length];
 for (var i = 0; i < lines.Length; i++) resourceNames[i] = GetResourceNames(lines[i].separateLines);
 
+if (resourceNames.Length < 1)
+{
+	Console.WriteLine("No resource names found.");
+	goto end;
+}
+
 var resourceFiles = new ReadOnlyDictionary<string, FileInfo[]>[resourceNames.Length];
 for (var i = 0; i < resourceNames.Length; i++) resourceFiles[i] = GetResourceFiles(resourceNames[i], lines[i].lines);
+
+if (resourceFiles.Length < 1)
+{
+	Console.WriteLine("No resource files found.");
+	goto end;
+}
 
 var timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
 foreach (var (hash, files) in resourceFiles.SelectMany(x => x.Select(y => (y.Key, y.Value))))
@@ -30,6 +49,7 @@ foreach (var (hash, files) in resourceFiles.SelectMany(x => x.Select(y => (y.Key
 	}
 }
 
+end:
 Console.WriteLine($"Total {Stopwatch.GetElapsedTime(total)}");
 GC.Collect(GC.MaxGeneration, GCCollectionMode.Aggressive, true, true);
 Console.ReadKey();
