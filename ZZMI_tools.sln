@@ -4,6 +4,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shaders", "Shaders\Shaders.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VgRemapper", "VgRemapper\VgRemapper.csproj", "{E36A30AC-CE94-4FD3-86CA-818F6F11D9D4}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SlotFix applier", "SlotFix applier\SlotFix applier.csproj", "{B9150996-B56F-4CA1-A3BF-40BE61015173}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -18,5 +20,9 @@ Global
 		{E36A30AC-CE94-4FD3-86CA-818F6F11D9D4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E36A30AC-CE94-4FD3-86CA-818F6F11D9D4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E36A30AC-CE94-4FD3-86CA-818F6F11D9D4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B9150996-B56F-4CA1-A3BF-40BE61015173}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B9150996-B56F-4CA1-A3BF-40BE61015173}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B9150996-B56F-4CA1-A3BF-40BE61015173}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B9150996-B56F-4CA1-A3BF-40BE61015173}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

@@ -59,7 +59,7 @@ public static partial class Program
 	private const byte Stride = 32;
 
 	private static readonly FrozenDictionary<string, Func<uint, uint>> s_blendMappings =
-		new Dictionary<string, Func<uint, uint>>
+		new Dictionary<string, Func<uint, uint>>()
 		{
 			{
 				"4f3ddd5c",
