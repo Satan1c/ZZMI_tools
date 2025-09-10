@@ -113,9 +113,9 @@ public static partial class Program
 		using var reader = new StreamReader(readStream, leaveOpen: false);
 		
 		var lines = await reader.ReadToEndAsync();
-		var separatedLines = lines.Split(Environment.NewLine).Select(x => x.Trim()).Where(x => !string.IsNullOrEmpty(x)).ToArray();
-		
-		return (string.Join('\n', separatedLines), separatedLines);
+		var separatedLines = lines.Replace("\r\n", "\n").Split('\n').AsParallel().Select(x => x.Trim()).Where(x => !string.IsNullOrEmpty(x)).ToArray();
+		lines = string.Join('\n', separatedLines);
+		return (lines, separatedLines);
 	}
 
 	private static ReadOnlyDictionary<string, string[]> GetResourceNames(string[] lines)
@@ -125,7 +125,7 @@ public static partial class Program
 		for (var i = 0; i < lines.Length; i++)
 		{
 			var line = lines[i];
-			if (line.AsSpan().TrimStart().StartsWith('[')) continue;
+			if (line.AsSpan().StartsWith('[')) continue;
 			
 			var hashMatch = s_hashRegex.Match(line);
 			if (!hashMatch.Success) continue;
@@ -138,7 +138,7 @@ public static partial class Program
 			for (; j < lines.Length; j++, i++)
 			{
 				var nextLine = lines[j];
-				if (nextLine.AsSpan().TrimStart().StartsWith('[')) break;
+				if (nextLine.AsSpan().StartsWith('[')) break;
 				
 				var bledResourceNameMatch = s_blendResourceNameRegex.Match(nextLine);
 				if (!bledResourceNameMatch.Success) continue;
