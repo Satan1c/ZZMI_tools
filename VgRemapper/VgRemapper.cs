@@ -6,7 +6,7 @@ using System.Text.RegularExpressions;
 var current = Directory.GetCurrentDirectory();
 var total = Stopwatch.GetTimestamp();
 var inis = Directory
-	.EnumerateFiles(Directory.GetCurrentDirectory(), "*.ini", SearchOption.AllDirectories)
+	.EnumerateFiles(current, "*.ini", SearchOption.AllDirectories)
 	.Select(x => new FileInfo(x))
 	.Where(x => !x.Name.StartsWith("DISABLED", StringComparison.InvariantCultureIgnoreCase))
 	.ToArray();
