@@ -75,18 +75,18 @@
 {% block overridesibs %}
 	{% for component in mod_file.components if component.draw_vb != "" %}
 		{% for part in component.parts if part.vertex_count > 0 %}
-			[TextureOverride {{character_name}} {{component.name}}{{part.classification}}]
+			[TextureOverride {{character_name}} {{component.name}}{{part.name}}]
 			hash = {{ component.ib }}
 			match_first_index = {{ part.first_index }}
 			{% if part.index_count > 0 %}
 				match_index_count = {{part.index_count}}
 			{% endif %}
 			handling = skip
-			ib = Resource.{{component.name}}{{part.classification}}.IB
+			ib = Resource.{{component.name}}{{part.name}}.IB
 
 			{% if part.textures|length > 0%}
 				{% for texture in part.textures %}
-					Resource\ZZMI\{{ texture.name }} = ref Resource.{{component.name}}{{part.classification}}.{{ texture.name }}
+					Resource\ZZMI\{{ texture.name }} = ref Resource.{{component.name}}{{part.name}}.{{ texture.name }}
 				{% endfor %}
 				run = CommandList\ZZMI\SetTextures
 			{% endif %}
@@ -129,7 +129,7 @@
 		{% for part in component.parts %}
 			{% if part.textures|length > 0 %}
 				{% if count > 1 %}
-					[TextureOverride {{character_name}} {{component.name}}{{part.classification}}]
+					[TextureOverride {{character_name}} {{component.name}}{{part.name}}]
 					hash = {{component.ib}}
 					match_first_index = {{ part.first_index }}
 					{% if part.index_count > 0 %}
@@ -140,7 +140,7 @@
 				hash = {{component.ib}}
 				{% endif %}
 				{% for texture in part.textures %}
-					Resource\ZZMI\{{ texture.name }} = ref Resource.{{component.name}}{{part.classification}}.{{ texture.name }}
+					Resource\ZZMI\{{ texture.name }} = ref Resource.{{component.name}}{{part.name}}.{{ texture.name }}
 				{% endfor %}
 				run = CommandList\ZZMI\SetTextures
 
@@ -168,7 +168,7 @@
 			filename = {{ component.fullname }}Texcoord.buf
 		{% endif %}
 		{% for part in component.parts %}
-			[Resource.{{component.name}}{{part.classification}}.IB]
+			[Resource.{{component.name}}{{part.name}}.IB]
 			type = Buffer
 			format = DXGI_FORMAT_R32_UINT
 			filename = {{ part.fullname }}.ib
@@ -182,7 +182,7 @@
 			filename = {{ component.fullname }}.buf
 		{% endif %}
 		{% for part in component.parts %}
-			[Resource.{{component.name}}{{part.classification}}.IB]
+			[Resource.{{component.name}}{{part.name}}.IB]
 			type = Buffer
 			format = DXGI_FORMAT_R32_UINT
 			filename = {{ part.fullname }}.ib
@@ -194,7 +194,7 @@
 	{% for component in mod_file.components %}
 		{% for part in component.parts %}
 			{% for texture in part.textures %}
-				[Resource.{{component.name}}{{part.classification}}.{{ texture.name }}]
+				[Resource.{{component.name}}{{part.name}}.{{ texture.name }}]
 				filename = {{ part.fullname }}{{ texture.name }}{{ texture.extension }}
 			{% endfor %}
 		{% endfor %}
