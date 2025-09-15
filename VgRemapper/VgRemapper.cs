@@ -106,15 +106,15 @@ public static partial class Program
 			{ "324d9d21", "0139f7e8" }
 		}.ToFrozenDictionary();
 
-	[GeneratedRegex(@"^[ \t]*hash\s*=\s*(?<Hash>\w{8})", RegexOptions.IgnoreCase | RegexOptions.Multiline | RegexOptions.Compiled)]
+	[GeneratedRegex(@"^hash ?= ?(?<Hash>\w{8})", RegexOptions.IgnoreCase | RegexOptions.Multiline | RegexOptions.Compiled)]
 	private static partial Regex MyRegex();
 	private static readonly Regex s_hashRegex = MyRegex();
 
-	[GeneratedRegex(@"^[ \t]*vb2\s*=\s*(?:Resource(?<Name>.*))", RegexOptions.IgnoreCase | RegexOptions.Multiline | RegexOptions.Compiled)]
+	[GeneratedRegex(@"^vb2 ?= ?(?:Resource(?<Name>.*))", RegexOptions.IgnoreCase | RegexOptions.Multiline | RegexOptions.Compiled)]
 	private static partial Regex MyRegex1();
 	private static readonly Regex s_blendResourceNameRegex = MyRegex1();
 
-	[GeneratedRegex(@"^[ \t]*\[Resource(?<Name>.*)\]$\s^[ \t]*type\s*=\s*Buffer$\s^[ \t]*stride\s*=\s*32$\s^[ \t]*filename\s*=\s*(?<File>.+)$", RegexOptions.IgnoreCase | RegexOptions.Multiline | RegexOptions.Compiled)]
+	[GeneratedRegex(@"^\[Resource(?<Name>.+)\]$\s^type ?= ?Buffer$\s^stride ?= ?32$\s^filename ?= ?(?<File>.+)$", RegexOptions.IgnoreCase | RegexOptions.Multiline | RegexOptions.Compiled)]
 	private static partial Regex MyRegex2();
 	private static readonly Regex s_blendResourceRegex = MyRegex2();
 
