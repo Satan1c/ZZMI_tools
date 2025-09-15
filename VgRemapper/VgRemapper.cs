@@ -30,7 +30,7 @@ total = Stopwatch.GetTimestamp();
 var resourceNames = new ReadOnlyDictionary<string, string[]>[lines.Length];
 for (var i = 0; i < lines.Length; i++) resourceNames[i] = GetResourceNames(lines[i].separateLines);
 
-if (resourceNames.Length < 1)
+if (!resourceNames.Any(x => x.Values?.Any(y => y.Length > 0) ?? false))
 {
 	Console.WriteLine("No resource names found.");
 	goto end;
