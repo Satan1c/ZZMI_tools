@@ -3,8 +3,13 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
 
+var current = Directory.GetCurrentDirectory();
 var total = Stopwatch.GetTimestamp();
-var inis = Directory.EnumerateFiles(Directory.GetCurrentDirectory(), "*.ini", SearchOption.TopDirectoryOnly).Select(x => new FileInfo(x)).ToArray();
+var inis = Directory
+	.EnumerateFiles(Directory.GetCurrentDirectory(), "*.ini", SearchOption.AllDirectories)
+	.Select(x => new FileInfo(x))
+	.Where(x => !x.Name.StartsWith("DISABLED", StringComparison.InvariantCultureIgnoreCase))
+	.ToArray();
 
 if (inis.Length < 1)
 {
@@ -32,9 +37,15 @@ if (resourceNames.Length < 1)
 }
 
 var resourceFiles = new ReadOnlyDictionary<string, FileInfo[]>[resourceNames.Length];
-for (var i = 0; i < resourceNames.Length; i++) resourceFiles[i] = GetResourceFiles(resourceNames[i], lines[i].lines);
+for (var i = 0; i < resourceNames.Length; i++)
+{
+	Directory.SetCurrentDirectory(inis[i].DirectoryName ?? current);
+	resourceFiles[i] = GetResourceFiles(resourceNames[i], lines[i].lines);
+}
 
-if (resourceFiles.Length < 1)
+Directory.SetCurrentDirectory(current);
+
+if (!resourceFiles.Any(x => x.Values?.Any(y => y.Length > 0) ?? false))
 {
 	Console.WriteLine("No resource files found.");
 	goto end;
@@ -113,7 +124,13 @@ public static partial class Program
 		using var reader = new StreamReader(readStream, leaveOpen: false);
 		
 		var lines = await reader.ReadToEndAsync();
-		var separatedLines = lines.Replace("\r\n", "\n").Split('\n').AsParallel().Select(x => x.Trim()).Where(x => !string.IsNullOrEmpty(x)).ToArray();
+		var separatedLines = lines
+			.Replace("\r\n", "\n")
+			.Split('\n')
+			.AsParallel()
+			.Select(x => x.Trim())
+			.Where(x => !string.IsNullOrEmpty(x))
+			.ToArray();
 		lines = string.Join('\n', separatedLines);
 		return (lines, separatedLines);
 	}
@@ -155,7 +172,8 @@ public static partial class Program
 	}
 
 	private static ReadOnlyDictionary<string, FileInfo[]> GetResourceFiles(
-		IReadOnlyDictionary<string, string[]> namesMap, string lines)
+		IReadOnlyDictionary<string, string[]> namesMap,
+		string lines)
 	{
 		var resourceFilesMap = new Dictionary<string, FileInfo[]>();
 		foreach (var (hash, names) in namesMap)
