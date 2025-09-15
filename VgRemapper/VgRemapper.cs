@@ -106,11 +106,11 @@ public static partial class Program
 			{ "324d9d21", "0139f7e8" }
 		}.ToFrozenDictionary();
 
-	[GeneratedRegex(@"^hash ?= ?(?<Hash>\w{8})", RegexOptions.IgnoreCase | RegexOptions.Multiline | RegexOptions.Compiled)]
+	[GeneratedRegex(@"^hash ?= ?(?<Hash>\w{8})$", RegexOptions.IgnoreCase | RegexOptions.Multiline | RegexOptions.Compiled)]
 	private static partial Regex MyRegex();
 	private static readonly Regex s_hashRegex = MyRegex();
 
-	[GeneratedRegex(@"^vb2 ?= ?(?:Resource(?<Name>.*))", RegexOptions.IgnoreCase | RegexOptions.Multiline | RegexOptions.Compiled)]
+	[GeneratedRegex(@"^vb2 ?= ?(?:Resource(?<Name>.+))$", RegexOptions.IgnoreCase | RegexOptions.Multiline | RegexOptions.Compiled)]
 	private static partial Regex MyRegex1();
 	private static readonly Regex s_blendResourceNameRegex = MyRegex1();
 
