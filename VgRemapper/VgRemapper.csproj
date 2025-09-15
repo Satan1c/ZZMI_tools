@@ -15,6 +15,7 @@
         <OptimizationPreference>Speed</OptimizationPreference>
         <PublishAot>true</PublishAot>
         <StripSymbols>true</StripSymbols>
+		<EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
 	</PropertyGroup>
 
 	<PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
