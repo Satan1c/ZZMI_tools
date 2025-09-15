@@ -129,7 +129,7 @@ public static partial class Program
 			.Split('\n')
 			.AsParallel()
 			.Select(x => x.Trim())
-			.Where(x => !string.IsNullOrEmpty(x))
+			.Where(x => !string.IsNullOrEmpty(x) && !x.StartsWith(';'))
 			.ToArray();
 		lines = string.Join('\n', separatedLines);
 		return (lines, separatedLines);
