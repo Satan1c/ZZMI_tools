@@ -1,6 +1,6 @@
 ﻿using System.Collections.Frozen;
-using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 
 var current = Directory.GetCurrentDirectory();
@@ -27,16 +27,16 @@ var lines = linesTasks
 
 total = Stopwatch.GetTimestamp();
 
-var resourceNames = new ReadOnlyDictionary<string, string[]>[lines.Length];
+var resourceNames = new Dictionary<string, string[]>[lines.Length];
 for (var i = 0; i < lines.Length; i++) resourceNames[i] = GetResourceNames(lines[i].separateLines);
 
-if (!resourceNames.Any(x => x.Values?.Any(y => y.Length > 0) ?? false))
+if (!resourceNames.Any(x => x.Values.Any(y => y.Length > 0)))
 {
 	Console.WriteLine("No resource names found.");
 	goto end;
 }
 
-var resourceFiles = new ReadOnlyDictionary<string, FileInfo[]>[resourceNames.Length];
+var resourceFiles = new Dictionary<string, FileInfo[]>[resourceNames.Length];
 for (var i = 0; i < resourceNames.Length; i++)
 {
 	Directory.SetCurrentDirectory(inis[i].DirectoryName ?? current);
@@ -45,7 +45,7 @@ for (var i = 0; i < resourceNames.Length; i++)
 
 Directory.SetCurrentDirectory(current);
 
-if (!resourceFiles.Any(x => x.Values?.Any(y => y.Length > 0) ?? false))
+if (!resourceFiles.Any(x => x.Values.Any(y => y.Length > 0)))
 {
 	Console.WriteLine("No resource files found.");
 	goto end;
@@ -135,7 +135,7 @@ public static partial class Program
 		return (lines, separatedLines);
 	}
 
-	private static ReadOnlyDictionary<string, string[]> GetResourceNames(string[] lines)
+	private static Dictionary<string, string[]> GetResourceNames(string[] lines)
 	{
 		var resourceNamesMap = new Dictionary<string, string[]>();
 
@@ -150,7 +150,7 @@ public static partial class Program
 			var hash = hashMatch.Groups["Hash"].Value;
 			if (!s_blendMappings.ContainsKey(hash) && !s_positionToBlend.TryGetValue(hash, out hash)) continue;
 			
-			var resourceNames = new LinkedList<string>();
+			var resourceNames = new List<string>(1);
 			var j = i;
 			for (; j < lines.Length; j++, i++)
 			{
@@ -160,20 +160,18 @@ public static partial class Program
 				var bledResourceNameMatch = s_blendResourceNameRegex.Match(nextLine);
 				if (!bledResourceNameMatch.Success) continue;
 				
-				resourceNames.AddLast(bledResourceNameMatch.Groups["Name"].Value);
+				resourceNames.Add(bledResourceNameMatch.Groups["Name"].Value);
 				
 				break;
 			}
 
-			resourceNamesMap[hash] = resourceNames.ToArray();
+			resourceNamesMap[hash] = CollectionsMarshal.AsSpan(resourceNames).ToArray();
 		}
 
-		return resourceNamesMap.AsReadOnly();
+		return resourceNamesMap;
 	}
 
-	private static ReadOnlyDictionary<string, FileInfo[]> GetResourceFiles(
-		IReadOnlyDictionary<string, string[]> namesMap,
-		string lines)
+	private static Dictionary<string, FileInfo[]> GetResourceFiles(Dictionary<string, string[]> namesMap, string lines)
 	{
 		var resourceFilesMap = new Dictionary<string, FileInfo[]>();
 		foreach (var (hash, names) in namesMap)
@@ -189,26 +187,26 @@ public static partial class Program
 			resourceFilesMap[hash] = resourceFiles.Where(x => x.Exists).ToArray();
 		}
 		
-		return resourceFilesMap.AsReadOnly();
+		return resourceFilesMap;
 	}
 
-	private static byte[] bytes = [];
+	private static byte[] _bytes = [];
 	private static void Remap(string hash, FileInfo file, long timestamp)
 	{
-		bytes = File.ReadAllBytes(file.FullName);
+		_bytes = File.ReadAllBytes(file.FullName);
 		var data = Enumerable.Range(0, (int)(file.Length / Stride)).AsParallel().SelectMany(x =>
 		{
 			var group = x * Stride;
 			var weights = Enumerable.Range(0, 4).SelectMany(y =>
 			{
 				var i = group + y * 4;
-				var w = BitConverter.ToSingle(bytes.AsSpan()[new Range(i, i + 4)]);
+				var w = BitConverter.ToSingle(_bytes.AsSpan()[i..(i+4)]);
 				return BitConverter.GetBytes(w);
 			});
 			var indices = Enumerable.Range(0, 4).SelectMany(y =>
 			{
 				var i = group + y * 4 + 16;
-				var index = BitConverter.ToUInt32(bytes.AsSpan()[new Range(i, i + 4)]);
+				var index = BitConverter.ToUInt32(_bytes.AsSpan()[i..(i+4)]);
 				index = s_blendMappings[hash](index);
 				return BitConverter.GetBytes(index);
 			});
@@ -220,6 +218,6 @@ public static partial class Program
 		var directory = file.Directory!.FullName;
 		file.CopyTo(Path.Combine(directory, $"remap_backup_{name}_{timestamp}"));
 		File.WriteAllBytes(path, data);
-		bytes = [];
+		_bytes = [];
 	}
 }
