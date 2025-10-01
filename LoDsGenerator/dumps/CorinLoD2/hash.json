@@ -1,0 +1,152 @@
+[
+	{
+		"component_name": "Hair",
+		"root_vs": "e8425f64cfb887cd",
+		"draw_vb": "b508848a",
+		"position_vb": "1ae54d07",
+		"blend_vb": "16fc9732",
+		"texcoord_vb": "bab9e956",
+		"ib": "dc78239c",
+		"object_indexes": [
+			0
+		],
+		"object_classifications": [
+			"A"
+		],
+		"texture_hashes": [
+			[
+				[
+					"Diffuse",
+					".dds",
+					"60526444"
+				],
+				[
+					"NormalMap",
+					".jpg",
+					"ebac056e"
+				],
+				[
+					"LightMap",
+					".dds",
+					"74d66671"
+				],
+				[
+					"MaterialMap",
+					".dds",
+					"c6398bc8"
+				]
+			]
+		]
+	},
+	{
+		"component_name": "Body",
+		"root_vs": "e8425f64cfb887cd",
+		"draw_vb": "ddeec9b7",
+		"position_vb": "9a7dc2c7",
+		"blend_vb": "72405f18",
+		"texcoord_vb": "77523617",
+		"ib": "bb616c65",
+		"object_indexes": [
+			0
+		],
+		"object_classifications": [
+			"A"
+		],
+		"texture_hashes": [
+			[
+				[
+					"Diffuse",
+					".dds",
+					"af9d845a"
+				],
+				[
+					"NormalMap",
+					".jpg",
+					"ebac056e"
+				],
+				[
+					"LightMap",
+					".dds",
+					"e1c1718f"
+				],
+				[
+					"MaterialMap",
+					".dds",
+					"e58d9767"
+				]
+			]
+		]
+	},
+	{
+		"component_name": "Bear",
+		"root_vs": "e8425f64cfb887cd",
+		"draw_vb": "ccb58037",
+		"position_vb": "add0c6cb",
+		"blend_vb": "4e19ad40",
+		"texcoord_vb": "727e3743",
+		"ib": "2ab4ed6c",
+		"object_indexes": [
+			0
+		],
+		"object_classifications": [
+			"A"
+		],
+		"texture_hashes": [
+			[
+				[
+					"Diffuse",
+					".dds",
+					"af9d845a"
+				],
+				[
+					"NormalMap",
+					".jpg",
+					"ebac056e"
+				],
+				[
+					"LightMap",
+					".dds",
+					"e1c1718f"
+				],
+				[
+					"MaterialMap",
+					".dds",
+					"e58d9767"
+				]
+			]
+		]
+	},
+	{
+		"component_name": "Face",
+		"root_vs": "",
+		"draw_vb": "",
+		"position_vb": "",
+		"blend_vb": "",
+		"texcoord_vb": "",
+		"ib": "458a8953",
+		"object_indexes": [
+			0,
+			4236
+		],
+		"object_classifications": [
+			"A",
+			"B"
+		],
+		"texture_hashes": [
+			[
+				[
+					"Diffuse",
+					".dds",
+					"6d662824"
+				]
+			],
+			[
+				[
+					"Diffuse",
+					".dds",
+					"6d662824"
+				]
+			]
+		]
+	}
+]
