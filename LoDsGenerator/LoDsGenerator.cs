@@ -7,7 +7,6 @@ using System.Text.RegularExpressions;
 var singleOverrides = true;
 singleOverrides = (args.Length > 0 && args[0] != "split") || (Console.ReadLine() != "split");
 
-Directory.SetCurrentDirectory("/Users/oleksandr.fedotov/RiderProjects/ZZMI_tools/LoDsGenerator/dumps");
 var dumps = Directory
 	.EnumerateDirectories(Directory.GetCurrentDirectory())
 	.Select(x => DumpNameRegex.Match(x))
