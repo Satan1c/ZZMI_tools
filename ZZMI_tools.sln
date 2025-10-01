@@ -6,6 +6,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VgRemapper", "VgRemapper\Vg
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SlotFix applier", "SlotFix applier\SlotFix applier.csproj", "{B9150996-B56F-4CA1-A3BF-40BE61015173}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LoDsGenerator", "LoDsGenerator\LoDsGenerator.csproj", "{D75C231C-FFF3-4291-8276-0BA3130DCF60}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -24,5 +26,9 @@ Global
 		{B9150996-B56F-4CA1-A3BF-40BE61015173}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B9150996-B56F-4CA1-A3BF-40BE61015173}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B9150996-B56F-4CA1-A3BF-40BE61015173}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D75C231C-FFF3-4291-8276-0BA3130DCF60}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D75C231C-FFF3-4291-8276-0BA3130DCF60}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D75C231C-FFF3-4291-8276-0BA3130DCF60}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D75C231C-FFF3-4291-8276-0BA3130DCF60}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
