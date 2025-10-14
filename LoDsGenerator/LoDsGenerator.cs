@@ -1,11 +1,11 @@
-﻿using System.Runtime.InteropServices;
+﻿using System.Numerics;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 
-var singleOverrides = true;
-singleOverrides = (args.Length > 0 && args[0] != "split") || (Console.ReadLine() != "split");
+var singleOverrides = (args.Length > 0 && args[0] != "split") || (Console.ReadLine() != "split");
 
 var dumps = Directory
 	.EnumerateDirectories(Directory.GetCurrentDirectory())
@@ -65,7 +65,7 @@ return;
 void WriteMultiOverrides()
 {
 	var overridesPath = Path.Join(resultPath, "override");
-	var inisSbs = Enumerable.Range(0, 3).Select(x => new StringBuilder("namespace = \n", 5 * 1024)).ToArray();
+	var inisSbs = Enumerable.Range(0, 3).Select(_ => new StringBuilder("namespace = \n", 5 * 1024)).ToArray();
 	for (byte i = 0; i < dumps.Length; i++)
 	{
 		var overridesSb = inisSbs[i];
@@ -103,8 +103,9 @@ void WriteSingleOverrides()
 	tasks.Add(File.WriteAllTextAsync(overridesPath, overridesSb.ToString().Trim()));
 }
 
-public record struct Dump(Match Match, ComponentFormat[] Components);
-public struct ComponentFormat
+internal record struct Dump(Match Match, ComponentFormat[] Components) : IEqualityOperators<Dump, Dump, bool>;
+
+internal struct ComponentFormat
 {
 	[JsonPropertyName("component_name")]
 	public string Name { get; set; }
@@ -129,7 +130,7 @@ public struct ComponentFormat
 }
 
 [JsonSerializable(typeof(ComponentFormat[]))]
-public partial class ComponentFormatContext : JsonSerializerContext;
+internal partial class ComponentFormatContext : JsonSerializerContext;
 
 public static partial class Program
 {
@@ -222,32 +223,32 @@ public static partial class Program
 		run = CommandList.{2}{4}
 		""";
 	
-	private static string[] OverridesTemplates = [
+	private static readonly string[] OverridesTemplates = [
 		BlendOverrideTemplate,
 		TexcoordOverrideTemplate,
 		IbOverrideTemplate,
 		DrawOverrideTemplate
 	];
-	private static string[] CommandsTemplates = [
+	private static readonly string[] CommandsTemplates = [
 		BlendCommandListTemplate,
 		string.Empty,
 		IbCommandListTemplate,
 		string.Empty
 	];
-	private static string[] CommandsTemplatesEmptyIb = [
+	private static readonly string[] CommandsTemplatesEmptyIb = [
 		BlendCommandListTemplate,
 		string.Empty,
 		EmptyIbCommandListTemplate,
 		string.Empty
 	];
-	private static string[] ResourceTemplates = [
+	private static readonly string[] ResourceTemplates = [
 		VbResourceTemplate,
 		VbResourceTemplate,
 		IbResourceTemplate,
 		TextureResourceTemplate
 	];
 	
-	private static string[] TextureNames = [
+	private static readonly string[] TextureNames = [
 		"Diffuse",
 		"NormalMap",
 		"LightMap",
@@ -267,8 +268,8 @@ public static partial class Program
 		ulong indexCount = 0,
 		ulong size = 0,
 		ulong stride = 0,
-		ulong count_override = 0,
-		ulong stride_override = 0,
+		ulong countOverride = 0,
+		ulong strideOverride = 0,
 		string semanticName = ""
 		)
 	{
@@ -285,15 +286,15 @@ public static partial class Program
 		}
 
 		var overrides = new StringBuilder(127);
-		if (count_override != 0 && stride_override != 0)
+		if (countOverride != 0 && strideOverride != 0)
 		{
 			overrides
 				.Append('\n')
 				.Append("override_byte_stride = ")
-				.Append(stride_override)
+				.Append(strideOverride)
 				.Append('\n')
 				.Append("override_vertex_count = ")
-				.Append(count_override)
+				.Append(countOverride)
 				.Append('\n');
 		}
 		return [
