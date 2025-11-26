@@ -144,11 +144,87 @@ public static class Generator
 			}
 		}
 
-		var str = JsonSerializer.Serialize(
-			changesDict
-				.Select(x => new KeyValuePair<string, Dictionary<string, Changes>>(x.Key.Split('/')[^1], x.Value))
-				.OrderBy(x => x.Key).ToDictionary(), DumpContext.Default.DictionaryStringDictionaryStringChanges)!;
-		str = str.Replace(@"""Item1"": {", @"""From"": {").Replace(@"""Item2"": {", @"""To"": {");
+		var finalList = new List<HashChangeData>(1*1024*1024);
+
+		var counter = 0;
+		var prevChar = string.Empty;
+		var charName = string.Empty.AsSpan();
+		foreach (var (character, changes) in changesDict)
+		{
+			if (prevChar != character)
+			{
+				prevChar = character;
+				charName = character.Split('/')[^1].AsSpan();
+			}
+			counter = 1;
+			foreach (var (component, history) in changes)
+			{
+				var sb = new StringBuilder(64)
+					.Append(' ')
+					.Append(charName)
+					.Append(' ')
+					.Append(component);
+
+				foreach (var (from, to) in history.History)
+				{
+					if (!string.IsNullOrEmpty(from.Ib))
+					{
+						finalList.Add(new HashChangeData
+						{
+							From = from.Ib,
+							To = to.Ib,
+							Comment = new StringBuilder(128).Append(counter).Append(sb).Append(" ib").ToString()
+						});
+					}
+					
+					if (!string.IsNullOrEmpty(from.Blend))
+					{
+						finalList.Add(new HashChangeData
+						{
+							From = from.Blend,
+							To = to.Blend,
+							Comment = new StringBuilder(128).Append(counter).Append(sb).Append(" blend").ToString()
+						});
+					}
+					
+					if (!string.IsNullOrEmpty(from.Position))
+					{
+						finalList.Add(new HashChangeData
+						{
+							From = from.Position,
+							To = to.Position,
+							Comment = new StringBuilder(128).Append(counter).Append(sb).Append(" position").ToString()
+						});
+					}
+					
+					if (!string.IsNullOrEmpty(from.Texcoord))
+					{
+						finalList.Add(new HashChangeData
+						{
+							From = from.Texcoord,
+							To = to.Texcoord,
+							Comment = new StringBuilder(128).Append(counter).Append(sb).Append(" texcoord").ToString()
+						});
+					}
+					
+					if (!string.IsNullOrEmpty(from.Draw))
+					{
+						finalList.Add(new HashChangeData
+						{
+							From = from.Draw,
+							To = to.Draw,
+							Comment = new StringBuilder(128).Append(counter).Append(sb).Append(" draw").ToString()
+						});
+					}
+					counter++;
+				}
+			}
+		}
+		
+		changesDict.Clear();
+		
+		var str = JsonSerializer.Serialize(finalList, FixerDataCotext.Default.ListHashChangeData)!;
+		//str = str.Replace(@"""Item1"": {", @"""From"": {").Replace(@"""Item2"": {", @"""To"": {");
 		File.WriteAllText(SaveTo, str, Encoding.UTF8);
 	}
 }
@@ -222,6 +298,7 @@ internal class ChangesList : List<(ChangesData from, ChangesData to)> { }
 #endif
 internal sealed class Changes
 {
+	[JsonIgnore]
 	public ChangesData Data { get; set; } = null!;
 	
 	
