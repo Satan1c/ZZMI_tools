@@ -112,7 +112,7 @@ foreach (var (name, changesMap) in changesDict)
 {
 	foreach (var (component, changes) in changesMap)
 	{
-		if (changes.History.Count < 2)
+		if (changes.History.Count < 1)
 		{
 			changes.History.Clear();
 			changes.History.TrimExcess();
