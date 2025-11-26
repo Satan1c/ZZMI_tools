@@ -1,0 +1,1033 @@
+﻿{
+	"Anby": {
+		"Hair": {
+			"Data": {
+				"Draw": "91ffb01c",
+				"Position": "9af848eb",
+				"Blend": "313933a0",
+				"Texcoord": "496a781d",
+				"Ib": "5c0240db"
+			},
+			"History": [
+				{
+					"From": {
+						"Texcoord": "496a781d"
+					},
+					"To": {
+						"Texcoord": "39538886"
+					}
+				},
+				{
+					"From": {
+						"Texcoord": "39538886"
+					},
+					"To": {
+						"Texcoord": "496a781d"
+					}
+				}
+			]
+		}
+	},
+	"Astra": {
+		"Hair": {
+			"Data": {
+				"Draw": "d3c951b9",
+				"Position": "ee3c305a",
+				"Blend": "c3c08f85",
+				"Texcoord": "8ba0b335",
+				"Ib": "53cdac6c"
+			},
+			"History": [
+				{
+					"From": {
+						"Texcoord": "f8b92870"
+					},
+					"To": {
+						"Texcoord": "8ba0b335"
+					}
+				}
+			]
+		},
+		"Legs": {
+			"Data": {
+				"Draw": "8a8dbdc5",
+				"Position": "97cef448",
+				"Blend": "bc4d6455",
+				"Texcoord": "1433ee78",
+				"Ib": "92f33156"
+			},
+			"History": [
+				{
+					"From": {
+						"Texcoord": "da86a32e"
+					},
+					"To": {
+						"Texcoord": "1433ee78"
+					}
+				}
+			]
+		},
+		"Torso": {
+			"Data": {
+				"Draw": "13a07361",
+				"Position": "9b17301d",
+				"Blend": "9d35c352",
+				"Texcoord": "240d8c83",
+				"Ib": "7a110804"
+			},
+			"History": [
+				{
+					"From": {
+						"Blend": "3cd13d03"
+					},
+					"To": {
+						"Blend": "9d35c352"
+					}
+				}
+			]
+		}
+	},
+	"Belle": {
+		"Body": {
+			"Data": {
+				"Draw": "ac1c8f80",
+				"Position": "d2844c01",
+				"Blend": "c92a17d8",
+				"Texcoord": "801edbf4",
+				"Ib": "1817f3ca"
+			},
+			"History": [
+				{
+					"From": {
+						"Blend": "d7ca821f",
+						"Texcoord": "caf95576"
+					},
+					"To": {
+						"Blend": "c92a17d8",
+						"Texcoord": "801edbf4"
+					}
+				}
+			]
+		}
+	},
+	"Ben": {
+		"Body": {
+			"Data": {
+				"Draw": "dfd93ee5",
+				"Position": "b4db1979",
+				"Blend": "21dd67a7",
+				"Texcoord": "c7b58675",
+				"Ib": "94288cca"
+			},
+			"History": [
+				{
+					"From": {
+						"Blend": "a2f79d33"
+					},
+					"To": {
+						"Blend": "21dd67a7"
+					}
+				}
+			]
+		}
+	},
+	"Caesar": {
+		"Body": {
+			"Data": {
+				"Draw": "622b5a8d",
+				"Position": "7b6d4dab",
+				"Blend": "8a3da083",
+				"Texcoord": "0ca81129",
+				"Ib": "92061e5e"
+			},
+			"History": [
+				{
+					"From": {
+						"Texcoord": "3b2a70a5"
+					},
+					"To": {
+						"Texcoord": "0ca81129"
+					}
+				}
+			]
+		},
+		"Hair": {
+			"Data": {
+				"Draw": "bb723235",
+				"Position": "6de24342",
+				"Blend": "c2417533",
+				"Texcoord": "72537fa3",
+				"Ib": "7a8fa826"
+			},
+			"History": [
+				{
+					"From": {
+						"Texcoord": "af291513"
+					},
+					"To": {
+						"Texcoord": "72537fa3"
+					}
+				}
+			]
+		}
+	},
+	"Corin": {
+		"Hair": {
+			"Data": {
+				"Draw": "d345e472",
+				"Position": "7e7eee0d",
+				"Blend": "5fa50113",
+				"Texcoord": "abc95b03",
+				"Ib": "5a839fb2"
+			},
+			"History": [
+				{
+					"From": {
+						"Blend": "8d999156",
+						"Texcoord": "2cf242f4"
+					},
+					"To": {
+						"Blend": "5fa50113",
+						"Texcoord": "abc95b03"
+					}
+				}
+			]
+		}
+	},
+	"Ellen": {
+		"Body": {
+			"Data": {
+				"Draw": "cdce1fc2",
+				"Position": "b78f3616",
+				"Blend": "ed9cb852",
+				"Texcoord": "5ac6d5ee",
+				"Ib": "e30fae03"
+			},
+			"History": [
+				{
+					"From": {
+						"Draw": "7bd3f8c2",
+						"Position": "89d5fba4",
+						"Blend": "4f4a54f0",
+						"Texcoord": "26966844",
+						"Ib": "a72cfb34"
+					},
+					"To": {
+						"Draw": "cdce1fc2",
+						"Position": "b78f3616",
+						"Blend": "89589539",
+						"Texcoord": "5ac6d5ee",
+						"Ib": "e30fae03"
+					}
+				},
+				{
+					"From": {
+						"Blend": "89589539"
+					},
+					"To": {
+						"Blend": "ed9cb852"
+					}
+				}
+			]
+		},
+		"Hair": {
+			"Data": {
+				"Draw": "77ac5f85",
+				"Position": "ba0fe600",
+				"Blend": "e91c93e0",
+				"Texcoord": "a27a8e1a",
+				"Ib": "d44a8015"
+			},
+			"History": [
+				{
+					"From": {
+						"Draw": "d59a5fec",
+						"Position": "a5448398",
+						"Blend": "2f9df031",
+						"Texcoord": "9cddb082",
+						"Ib": "7f89a2b3"
+					},
+					"To": {
+						"Draw": "77ac5f85",
+						"Position": "ba0fe600",
+						"Blend": "52188576",
+						"Texcoord": "5c33833e",
+						"Ib": "d44a8015"
+					}
+				},
+				{
+					"From": {
+						"Texcoord": "5c33833e"
+					},
+					"To": {
+						"Texcoord": "a27a8e1a"
+					}
+				},
+				{
+					"From": {
+						"Blend": "52188576"
+					},
+					"To": {
+						"Blend": "e91c93e0"
+					}
+				}
+			]
+		}
+	},
+	"Grace": {
+		"Body": {
+			"Data": {
+				"Draw": "f1cba806",
+				"Position": "8855c5cf",
+				"Blend": "3b80154c",
+				"Texcoord": "4bb45448",
+				"Ib": "8b240678"
+			},
+			"History": [
+				{
+					"From": {
+						"Draw": "e5e04f6f",
+						"Position": "26ffa186",
+						"Blend": "50837a5c",
+						"Texcoord": "e536af35",
+						"Ib": "0f82a13e"
+					},
+					"To": {
+						"Draw": "f1cba806",
+						"Position": "8855c5cf",
+						"Blend": "3b80154c",
+						"Texcoord": "4bb45448",
+						"Ib": "8b240678"
+					}
+				}
+			]
+		},
+		"Hair": {
+			"Data": {
+				"Draw": "9e96a54f",
+				"Position": "1126fd58",
+				"Blend": "1bed412f",
+				"Texcoord": "89d903ba",
+				"Ib": "89299f56"
+			},
+			"History": [
+				{
+					"From": {
+						"Texcoord": "89d903ba"
+					},
+					"To": {
+						"Texcoord": "d21f32ad"
+					}
+				},
+				{
+					"From": {
+						"Texcoord": "d21f32ad"
+					},
+					"To": {
+						"Texcoord": "89d903ba"
+					}
+				}
+			]
+		}
+	},
+	"Harumasa": {
+		"Hair": {
+			"Data": {
+				"Draw": "9f75c05c",
+				"Position": "eddb9012",
+				"Blend": "2644c499",
+				"Texcoord": "4f45a9c5",
+				"Ib": "6324de38"
+			},
+			"History": [
+				{
+					"From": {
+						"Draw": "fa851c10",
+						"Position": "f5727f53",
+						"Blend": "52787e7d",
+						"Texcoord": "9879fba3",
+						"Ib": "f51a89c1"
+					},
+					"To": {
+						"Draw": "9f75c05c",
+						"Position": "eddb9012",
+						"Blend": "2644c499",
+						"Texcoord": "4f45a9c5",
+						"Ib": "6324de38"
+					}
+				}
+			]
+		},
+		"Body": {
+			"Data": {
+				"Draw": "1fb92e46",
+				"Position": "0899751e",
+				"Blend": "347a0e9d",
+				"Texcoord": "e14fbc30",
+				"Ib": "79679a10"
+			},
+			"History": [
+				{
+					"From": {
+						"Draw": "cafffd37",
+						"Position": "3fa41462",
+						"Blend": "c0b32d17",
+						"Texcoord": "95ee1030",
+						"Ib": "78bea30d"
+					},
+					"To": {
+						"Draw": "1fb92e46",
+						"Position": "0899751e",
+						"Blend": "347a0e9d",
+						"Texcoord": "e14fbc30",
+						"Ib": "79679a10"
+					}
+				}
+			]
+		}
+	},
+	"Jane": {
+		"Body": {
+			"Data": {
+				"Draw": "0e1c6740",
+				"Position": "10050266",
+				"Blend": "e27f398e",
+				"Texcoord": "949549de",
+				"Ib": "ba4255a5"
+			},
+			"History": [
+				{
+					"From": {
+						"Draw": "d1aa4b85",
+						"Position": "06f9bc49",
+						"Blend": "9727a184",
+						"Texcoord": "8b85c03e",
+						"Ib": "e2c0144e"
+					},
+					"To": {
+						"Draw": "0e1c6740",
+						"Position": "10050266",
+						"Blend": "e27f398e",
+						"Texcoord": "949549de",
+						"Ib": "ba4255a5"
+					}
+				}
+			]
+		},
+		"Hair": {
+			"Data": {
+				"Draw": "2d06e785",
+				"Position": "e7a3b7dc",
+				"Blend": "8721477f",
+				"Texcoord": "acec29f8",
+				"Ib": "9268a5af"
+			},
+			"History": [
+				{
+					"From": {
+						"Texcoord": "c8ad344e"
+					},
+					"To": {
+						"Texcoord": "257a90d6"
+					}
+				},
+				{
+					"From": {
+						"Draw": "5721e4e7",
+						"Position": "24323bf9",
+						"Blend": "0a10c747",
+						"Texcoord": "257a90d6",
+						"Ib": "7b16a708"
+					},
+					"To": {
+						"Draw": "2d06e785",
+						"Position": "e7a3b7dc",
+						"Blend": "8721477f",
+						"Texcoord": "acec29f8",
+						"Ib": "9268a5af"
+					}
+				}
+			]
+		}
+	},
+	"Koleda": {
+		"Body": {
+			"Data": {
+				"Draw": "2c856fbc",
+				"Position": "28b188d4",
+				"Blend": "ad8e1d95",
+				"Texcoord": "38b31082",
+				"Ib": "3afb3865"
+			},
+			"History": [
+				{
+					"From": {
+						"Texcoord": "e3021a32"
+					},
+					"To": {
+						"Texcoord": "38b31082"
+					}
+				}
+			]
+		},
+		"Hair": {
+			"Data": {
+				"Draw": "366e92ac",
+				"Position": "e5de61e4",
+				"Blend": "c6b75898",
+				"Texcoord": "e35571a9",
+				"Ib": "242a8d48"
+			},
+			"History": [
+				{
+					"From": {
+						"Texcoord": "1a9b182a"
+					},
+					"To": {
+						"Texcoord": "e35571a9"
+					}
+				}
+			]
+		}
+	},
+	"Lighter": {
+		"Body": {
+			"Data": {
+				"Draw": "84ed822e",
+				"Position": "f6bbabb5",
+				"Blend": "da216bb6",
+				"Texcoord": "e1ae7f38",
+				"Ib": "8899e0fd"
+			},
+			"History": [
+				{
+					"From": {
+						"Position": "0baec6b7",
+						"Texcoord": "710bca71"
+					},
+					"To": {
+						"Position": "5e461440",
+						"Texcoord": "25ad7289"
+					}
+				},
+				{
+					"From": {
+						"Position": "5e461440",
+						"Texcoord": "25ad7289"
+					},
+					"To": {
+						"Position": "f6bbabb5",
+						"Texcoord": "e1ae7f38"
+					}
+				}
+			]
+		}
+	},
+	"Lucy": {
+		"Body": {
+			"Data": {
+				"Draw": "da79199a",
+				"Position": "246b93e2",
+				"Blend": "66948a0f",
+				"Texcoord": "f60dbb9e",
+				"Ib": "be5f4c7d"
+			},
+			"History": [
+				{
+					"From": {
+						"Position": "5da9dafc",
+						"Blend": "b94b02e8",
+						"Texcoord": "00f11ea6",
+						"Ib": "e0ad50ed"
+					},
+					"To": {
+						"Position": "246b93e2",
+						"Blend": "66948a0f",
+						"Texcoord": "f60dbb9e",
+						"Ib": "be5f4c7d"
+					}
+				}
+			]
+		},
+		"Hair": {
+			"Data": {
+				"Draw": "5661afc3",
+				"Position": "6c733c84",
+				"Blend": "a37c7537",
+				"Texcoord": "c8810832",
+				"Ib": "69ad9d08"
+			},
+			"History": [
+				{
+					"From": {
+						"Blend": "5315f036",
+						"Texcoord": "751e21a5",
+						"Ib": "198e99d7"
+					},
+					"To": {
+						"Blend": "a37c7537",
+						"Texcoord": "c8810832",
+						"Ib": "69ad9d08"
+					}
+				}
+			]
+		}
+	},
+	"Lycaon": {
+		"Body": {
+			"Data": {
+				"Draw": "25418598",
+				"Position": "8c7775ae",
+				"Blend": "f2d1a929",
+				"Texcoord": "b950fda5",
+				"Ib": "6749b6e7"
+			},
+			"History": [
+				{
+					"From": {
+						"Draw": "2a340ed5",
+						"Position": "b68056b4",
+						"Blend": "a485180e",
+						"Texcoord": "949e688a",
+						"Ib": "25196b7a"
+					},
+					"To": {
+						"Draw": "25418598",
+						"Position": "8c7775ae",
+						"Blend": "f2d1a929",
+						"Texcoord": "b950fda5",
+						"Ib": "6749b6e7"
+					}
+				}
+			]
+		},
+		"Hair": {
+			"Data": {
+				"Draw": "cc59d8d6",
+				"Position": "31eda4d5",
+				"Blend": "3ab9a7a4",
+				"Texcoord": "b092c043",
+				"Ib": "060bc1ad"
+			},
+			"History": [
+				{
+					"From": {
+						"Texcoord": "395572dc"
+					},
+					"To": {
+						"Texcoord": "b092c043"
+					}
+				}
+			]
+		},
+		"Face": {
+			"Data": {
+				"Draw": "",
+				"Position": "",
+				"Blend": "",
+				"Texcoord": "",
+				"Ib": "6ffdfccb"
+			},
+			"History": [
+				{
+					"From": {
+						"Ib": "7341e07b"
+					},
+					"To": {
+						"Ib": "6ffdfccb"
+					}
+				}
+			]
+		}
+	},
+	"Nekomata": {
+		"Body": {
+			"Data": {
+				"Draw": "0c01e6a5",
+				"Position": "eaad1408",
+				"Blend": "d27d0e6b",
+				"Texcoord": "f589a51f",
+				"Ib": "26a487ff"
+			},
+			"History": [
+				{
+					"From": {
+						"Position": "2c317dda",
+						"Texcoord": "b5a4c084"
+					},
+					"To": {
+						"Position": "eaad1408",
+						"Texcoord": "f589a51f"
+					}
+				},
+				{
+					"From": {
+						"Blend": "d73bc96f"
+					},
+					"To": {
+						"Blend": "d27d0e6b"
+					}
+				}
+			]
+		}
+	},
+	"Piper": {
+		"Body": {
+			"Data": {
+				"Draw": "d28231af",
+				"Position": "ffe8fea7",
+				"Blend": "3d329807",
+				"Texcoord": "6357b120",
+				"Ib": "585da98b"
+			},
+			"History": [
+				{
+					"From": {
+						"Position": "b2f3e6aa",
+						"Texcoord": "a0d146b3"
+					},
+					"To": {
+						"Position": "ffe8fea7",
+						"Texcoord": "a011f94e"
+					}
+				},
+				{
+					"From": {
+						"Blend": "764276de",
+						"Texcoord": "a011f94e"
+					},
+					"To": {
+						"Blend": "3d329807",
+						"Texcoord": "6357b120"
+					}
+				}
+			]
+		},
+		"Hair": {
+			"Data": {
+				"Draw": "da8a2564",
+				"Position": "c4619559",
+				"Blend": "64697011",
+				"Texcoord": "1c6d41af",
+				"Ib": "940454ef"
+			},
+			"History": [
+				{
+					"From": {
+						"Texcoord": "8b6b17f8"
+					},
+					"To": {
+						"Texcoord": "fd1b9c29"
+					}
+				},
+				{
+					"From": {
+						"Texcoord": "fd1b9c29"
+					},
+					"To": {
+						"Texcoord": "8b6b17f8"
+					}
+				},
+				{
+					"From": {
+						"Texcoord": "8b6b17f8"
+					},
+					"To": {
+						"Texcoord": "1c6d41af"
+					}
+				}
+			]
+		}
+	},
+	"Qingyi": {
+		"Body": {
+			"Data": {
+				"Draw": "7be61bce",
+				"Position": "ac54012f",
+				"Blend": "88a6f633",
+				"Texcoord": "4cbe7fbe",
+				"Ib": "195857d8"
+			},
+			"History": [
+				{
+					"From": {
+						"Draw": "b1f382cd",
+						"Position": "dd421c3a",
+						"Blend": "0287b8fb",
+						"Texcoord": "00487185",
+						"Ib": "d915de65"
+					},
+					"To": {
+						"Draw": "7be61bce",
+						"Position": "ac54012f",
+						"Blend": "88a6f633",
+						"Texcoord": "4cbe7fbe",
+						"Ib": "195857d8"
+					}
+				}
+			]
+		},
+		"Hair": {
+			"Data": {
+				"Draw": "7b43d317",
+				"Position": "dd08951b",
+				"Blend": "6e7650bc",
+				"Texcoord": "53a2b66e",
+				"Ib": "3cacba0a"
+			},
+			"History": [
+				{
+					"From": {
+						"Draw": "6a52010a",
+						"Position": "b6e5374d",
+						"Blend": "d196bd5c",
+						"Texcoord": "dae0117f",
+						"Ib": "33f6d1f2"
+					},
+					"To": {
+						"Draw": "7b43d317",
+						"Position": "dd08951b",
+						"Blend": "6e7650bc",
+						"Texcoord": "0643440c",
+						"Ib": "3cacba0a"
+					}
+				},
+				{
+					"From": {
+						"Texcoord": "0643440c"
+					},
+					"To": {
+						"Texcoord": "53a2b66e"
+					}
+				}
+			]
+		}
+	},
+	"Soldier0": {
+		"Face": {
+			"Data": {
+				"Draw": "",
+				"Position": "",
+				"Blend": "",
+				"Texcoord": "",
+				"Ib": "e30ca87f"
+			},
+			"History": [
+				{
+					"From": {
+						"Ib": "f2f539b8"
+					},
+					"To": {
+						"Ib": "e30ca87f"
+					}
+				}
+			]
+		}
+	},
+	"Wise": {
+		"Bag": {
+			"Data": {
+				"Draw": "24ca2d36",
+				"Position": "19f96193",
+				"Blend": "d80dc314",
+				"Texcoord": "8d825ff1",
+				"Ib": "b1df5d22"
+			},
+			"History": [
+				{
+					"From": {
+						"Texcoord": "cb22cb95"
+					},
+					"To": {
+						"Texcoord": "8d825ff1"
+					}
+				}
+			]
+		},
+		"Body": {
+			"Data": {
+				"Draw": "b581dc0a",
+				"Position": "67f21c9f",
+				"Blend": "46462bd8",
+				"Texcoord": "91fbd2fa",
+				"Ib": "8d6acf4e"
+			},
+			"History": [
+				{
+					"From": {
+						"Draw": "73c48816",
+						"Position": "9581de22",
+						"Blend": "1d55bd87",
+						"Texcoord": "a012c752",
+						"Ib": "054ea752"
+					},
+					"To": {
+						"Draw": "b581dc0a",
+						"Position": "67f21c9f",
+						"Blend": "46462bd8",
+						"Texcoord": "91fbd2fa",
+						"Ib": "8d6acf4e"
+					}
+				}
+			]
+		},
+		"Hair": {
+			"Data": {
+				"Draw": "ef9c0510",
+				"Position": "e8df7ff3",
+				"Blend": "edfd1666",
+				"Texcoord": "774071dd",
+				"Ib": "d5ca0411"
+			},
+			"History": [
+				{
+					"From": {
+						"Draw": "ba59bf09",
+						"Position": "6235fa7f",
+						"Blend": "1273c7b0",
+						"Texcoord": "fe89498c",
+						"Ib": "f6cac296"
+					},
+					"To": {
+						"Draw": "ef9c0510",
+						"Position": "e8df7ff3",
+						"Blend": "edfd1666",
+						"Texcoord": "774071dd",
+						"Ib": "d5ca0411"
+					}
+				}
+			]
+		}
+	},
+	"Yanagi": {
+		"Body": {
+			"Data": {
+				"Draw": "2fe26340",
+				"Position": "7ff000de",
+				"Blend": "b558d482",
+				"Texcoord": "f4fbc5c0",
+				"Ib": "f478ee4c"
+			},
+			"History": [
+				{
+					"From": {
+						"Blend": "fd363c76"
+					},
+					"To": {
+						"Blend": "b558d482"
+					}
+				}
+			]
+		},
+		"Glasses": {
+			"Data": {
+				"Draw": "178a1ff8",
+				"Position": "8e3cf210",
+				"Blend": "6b5d6e39",
+				"Texcoord": "dd32963a",
+				"Ib": "44d9123b"
+			},
+			"History": [
+				{
+					"From": {
+						"Draw": "",
+						"Position": "",
+						"Blend": "",
+						"Texcoord": "",
+						"Ib": "2e92fc77"
+					},
+					"To": {
+						"Draw": "178a1ff8",
+						"Position": "8e3cf210",
+						"Blend": "6b5d6e39",
+						"Texcoord": "dd32963a",
+						"Ib": "44d9123b"
+					}
+				}
+			]
+		}
+	},
+	"Yixuan": {
+		"Bottle": {
+			"Data": {
+				"Draw": "05466ddf",
+				"Position": "8555098d",
+				"Blend": "d89da8eb",
+				"Texcoord": "ff4b112b",
+				"Ib": "1630f2d0"
+			},
+			"History": [
+				{
+					"From": {
+						"Draw": "d000beae",
+						"Position": "d0ff2c18",
+						"Blend": "55638d51",
+						"Texcoord": "f05da93a",
+						"Ib": "0219df6e"
+					},
+					"To": {
+						"Draw": "05466ddf",
+						"Position": "8555098d",
+						"Blend": "d89da8eb",
+						"Texcoord": "ff4b112b",
+						"Ib": "1630f2d0"
+					}
+				}
+			]
+		}
+	},
+	"ZhuYuan": {
+		"Body": {
+			"Data": {
+				"Draw": "291f7f5a",
+				"Position": "f595d24d",
+				"Blend": "01e0c8d9",
+				"Texcoord": "cb885260",
+				"Ib": "6619364f"
+			},
+			"History": [
+				{
+					"From": {
+						"Position": "f3569f8d",
+						"Blend": "5e942526",
+						"Texcoord": "160872c0",
+						"Ib": "a4aeb1d5"
+					},
+					"To": {
+						"Position": "f595d24d",
+						"Blend": "01e0c8d9",
+						"Texcoord": "cb885260",
+						"Ib": "6619364f"
+					}
+				}
+			]
+		},
+		"Hair": {
+			"Data": {
+				"Draw": "a3091843",
+				"Position": "d140d2e7",
+				"Blend": "9d35aee2",
+				"Texcoord": "f3c092c5",
+				"Ib": "9821017e"
+			},
+			"History": [
+				{
+					"From": {
+						"Texcoord": "f3c092c5"
+					},
+					"To": {
+						"Texcoord": "fdc045fc"
+					}
+				},
+				{
+					"From": {
+						"Texcoord": "fdc045fc"
+					},
+					"To": {
+						"Texcoord": "f3c092c5"
+					}
+				}
+			]
+		}
+	}
+}

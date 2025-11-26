@@ -10,6 +10,7 @@ public static class GithubGrabber
 	private const string GhRepoFolder = "PlayerCharacterData";
 
 	private const string BaseAddress = $"https://raw.githubusercontent.com/{GhRepoUsername}/{GhRepoName}/";
+	
 	public static async ValueTask<(DateTimeOffset date, string name, string data)[]> Run()
 	{
 		using var httpClient = new HttpClient();
