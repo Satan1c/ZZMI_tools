@@ -8,6 +8,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SlotFix applier", "SlotFix 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LoDsGenerator", "LoDsGenerator\LoDsGenerator.csproj", "{D75C231C-FFF3-4291-8276-0BA3130DCF60}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VersionFixerGenerator", "VersionFixerGenerator\VersionFixerGenerator.csproj", "{1A7A505D-F607-4022-9797-0AC0AD74A9B8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -30,5 +32,9 @@ Global
 		{D75C231C-FFF3-4291-8276-0BA3130DCF60}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D75C231C-FFF3-4291-8276-0BA3130DCF60}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D75C231C-FFF3-4291-8276-0BA3130DCF60}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1A7A505D-F607-4022-9797-0AC0AD74A9B8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1A7A505D-F607-4022-9797-0AC0AD74A9B8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1A7A505D-F607-4022-9797-0AC0AD74A9B8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1A7A505D-F607-4022-9797-0AC0AD74A9B8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
