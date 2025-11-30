@@ -1,77 +1,46 @@
 //#define GENERATOR
-#define GH_GRABBER
+//#define GH_GRABBER
 //#define LOCAL_GRABBER
 
+using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
-using VersionFixerGenerator;
 
 var hashesPath = Console.ReadLine();
 if (string.IsNullOrEmpty(hashesPath))
 	hashesPath = Directory.GetCurrentDirectory();
 
-hashesPath = @"C:\Users\Satan1c\OneDrive\Documents\Development\projects\ZZMI_tools\VersionFixerGenerator\PlayerCharacterData";
-
-if (!Directory.Exists(hashesPath))
-	Directory.CreateDirectory(hashesPath);
-
 Directory.SetCurrentDirectory(hashesPath);
 
-Generator.SaveTo = Path.Combine(hashesPath, "PlayerCharacterData.json");
+Console.WriteLine("base path");
+Console.WriteLine(hashesPath);
+Console.WriteLine();
 
 #if GENERATOR
+Generator.SaveTo = Path.Combine(hashesPath, "PlayerCharacterData.json");
 #if GH_GRABBER
 Generator.Run(await GithubGrabber.Run());
 #elif LOCAL_GRABBER
 Generator.Run(await GithubGrabber.Run());
 #endif
+ReadData(Generator.SaveTo);
+#else
+ReadData(Path.Combine(hashesPath, "PlayerCharacterData.json"));
 #endif
 
-var data = JsonSerializer.Deserialize<HashChangeData[]>(File.ReadAllText(Generator.SaveTo), FixerDataCotext.Default.HashChangeDataArray)!;
-
-var iniPath = @"yanagi_yuying.ini";
-var backIniPath =
-	string.Concat("DISABLED_", DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString().AsSpan(), "_", iniPath);
-File.Move(iniPath, backIniPath);
-
-using var iniFile = File.Open(iniPath, FileMode.Create, FileAccess.Write);
-using var iniWriter = new StreamWriter(iniFile, leaveOpen: false);
-using var backIniFile = File.Open(backIniPath, FileMode.Open, FileAccess.Read);
-using var iniReader = new StreamReader(backIniFile, leaveOpen: false);
-
-while (!iniReader.EndOfStream)
+foreach (var path in Directory.EnumerateFiles(Directory.GetCurrentDirectory(), "*.ini", SearchOption.AllDirectories))
 {
-	var line = iniReader.ReadLine() ?? string.Empty;
-	
-	var match = HashRegex.Match(line.TrimStart());
-	if (match.Success)
-	{
-		var hash = match.Groups["hash"].Value;
-		ushort index = 0;
-		
-		while(true)
-		{
-			var tempHash = data.FirstOrDefault(x => x.From == hash);
-			if (tempHash == null)
-				break;
-			var tempIndex = ushort.Parse(tempHash.Comment.Split(' ')[0]);
-			
-			if (tempIndex <= index || hash == tempHash.To)
-				break;
-			
-			index = tempIndex;
-			hash = tempHash.To;
-		}
-		
-		if (index > 0)
-			line = $"{match.Groups["front"].Value}hash = {hash}";
-	}
-	
-	iniWriter.WriteLine(line);
+	if (Path.GetFileName(path).StartsWith("disabled", StringComparison.InvariantCultureIgnoreCase))
+		continue;
+	Console.WriteLine("Found ini:");
+	Console.WriteLine(path);
+	Run(path);
+	Console.WriteLine();
 }
 
 Console.WriteLine("Done");
+Console.ReadKey();
 
 internal sealed class HashChangeData
 {
@@ -89,6 +58,69 @@ internal partial class FixerDataCotext : JsonSerializerContext;
 public static partial class Program
 {
 	[GeneratedRegex(@"^hash ?= ?(?<hash>\w{8})$", RegexOptions.Compiled)]
-	public static partial Regex GetHashRegex();
-	public static Regex HashRegex = GetHashRegex();
+	private static partial Regex GetHashRegex();
+	private static readonly Regex HashRegex = GetHashRegex();
+
+	private static HashChangeData[] _data;
+
+	private static void ReadData(string jsonPath)
+	{
+		_data = JsonSerializer.Deserialize<HashChangeData[]>(jsonPath, FixerDataCotext.Default.HashChangeDataArray)!;
+	}
+	
+	private static void Run(string iniPath)
+	{
+		var iniLines = File.ReadLines(iniPath, Encoding.UTF8).ToArray();
+		var newIniLines = new string[iniLines.Length];
+		
+		var changed = false;
+		for (var i = 0; i < iniLines.Length; i++)
+		{
+			var line = iniLines[i];
+			var match = HashRegex.Match(line.TrimStart());
+			if (match.Success)
+			{
+				var hash = match.Groups["hash"].Value;
+				ushort index = 0;
+
+				while(true)
+				{
+					var tempHash = _data.FirstOrDefault(x => x.From == hash);
+					if (tempHash is null)
+						break;
+					var tempIndex = ushort.Parse(tempHash.Comment.Split(' ')[0]);
+			
+					if (tempIndex <= index || hash == tempHash.To)
+						break;
+			
+					index = tempIndex;
+					hash = tempHash.To;
+				}
+		
+				if (index > 0)
+				{
+					changed = true;
+					line = $"{match.Groups["front"].Value}hash = {hash}";
+					Console.Write("Found hash to change: ");
+					Console.WriteLine($"{match.Groups["hash"].Value} -> {hash}");
+				}
+			}
+	
+			newIniLines[i] = line;
+		}
+		
+		if (!changed)
+			return;
+		
+		var fileName = Path.GetFileName(iniPath);
+		var backIniPath =
+			string.Concat(iniPath[..^fileName.Length], "DISABLED_", DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString(), "_", fileName);
+		File.Move(iniPath, backIniPath);
+		
+		if (!File.Exists(iniPath))
+		{
+			File.Create(iniPath).Close();
+		}
+		File.WriteAllLines(iniPath, newIniLines, Encoding.UTF8);
+	}
 }
