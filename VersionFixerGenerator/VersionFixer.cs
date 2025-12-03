@@ -14,6 +14,29 @@ if (string.IsNullOrEmpty(hashesPath))
 
 Directory.SetCurrentDirectory(hashesPath);
 
+Console.Write("\nChose action:\nfix - to run fixer\nundo - to revert applied fix\n(leave empty for fix): ");
+var action = Console.ReadLine();
+if (action == "undo")
+{
+	Console.WriteLine("Undoing changes...");
+	foreach (var path in Directory.EnumerateFiles(Directory.GetCurrentDirectory(), "DISABLED_versionfix_*.ini", SearchOption.AllDirectories))
+	{
+		var match = FilenameRegex.Match(Path.GetFileName(path));
+		if (!match.Success)
+			continue;
+		
+		var originalPath = Path.Combine(Path.GetDirectoryName(path)!, match.Groups["name"].Value);
+		if (File.Exists(originalPath))
+		{
+			File.Delete(originalPath);
+		}
+		File.Move(path, originalPath);
+		Console.WriteLine($"Restored: {originalPath}");
+	}
+	Console.WriteLine("Undo complete.");
+	return;
+}
+
 Console.WriteLine("base path");
 Console.WriteLine(hashesPath);
 Console.WriteLine();
@@ -58,9 +81,13 @@ internal partial class FixerDataCotext : JsonSerializerContext;
 
 public static partial class Program
 {
-	[GeneratedRegex(@"^hash ?= ?(?<hash>\w{8})$", RegexOptions.Compiled)]
+	[GeneratedRegex(@"^hash ?= ?(?<hash>\w{8})$", RegexOptions.Compiled | RegexOptions.Multiline)]
 	private static partial Regex GetHashRegex();
 	private static readonly Regex HashRegex = GetHashRegex();
+	
+	[GeneratedRegex(@"DISABLED_versionfix_\d*-(?<name>.+\.ini)", RegexOptions.Compiled)]
+	private static partial Regex GetFilenameRegex();
+	private static readonly Regex FilenameRegex = GetFilenameRegex();
 
 	private static HashChangeData[] _data = null!;
 
@@ -115,7 +142,7 @@ public static partial class Program
 		
 		var fileName = Path.GetFileName(iniPath);
 		var backIniPath =
-			string.Concat(iniPath[..^fileName.Length], "DISABLED_", DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString(), "_", fileName);
+			string.Concat(iniPath[..^fileName.Length], "DISABLED_versionfix_", DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString(), "-", fileName);
 		File.Move(iniPath, backIniPath);
 		
 		if (!File.Exists(iniPath))
