@@ -11,7 +11,7 @@ if (args[0] is "-h" or "--help")
 {
 	Console.WriteLine("Options:");
 	Console.WriteLine("  -l, --logging [v|s|n]   Set logging mode: v - verbose, s - standard, n - none");
-	Console.WriteLine("  -p, --path \"[path]\"   Set the path to the Mods folder");
+	Console.WriteLine("  -p, --path \"[path]\"   Set the path to the Mods folder (default is current directory)");
 	Console.WriteLine("Commands:");
 	Console.WriteLine("  fix                      Run the fixer (default)");
 	Console.WriteLine("  undo                     Revert applied fix");
@@ -57,12 +57,7 @@ string action;
 if (args.Any(x => x is "fix" or "undo"))
 {
 	var index = args.IndexOf("fix", "undo");
-	if (index is -1)
-	{
-		Console.WriteLine("No command was specified, exiting.");
-		return;
-	}
-	action = args[index];
+	action = index is -1 ? "fix" : args[index];
 }
 else
 {
