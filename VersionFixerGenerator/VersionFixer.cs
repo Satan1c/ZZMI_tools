@@ -146,6 +146,11 @@ public static partial class Program
 
 	private static void ReadData(string jsonPath)
 	{
+		if (!File.Exists(jsonPath))
+		{
+			Console.WriteLine("PlayerCharacterData.json not found!");
+			return;
+		}
 		_data = JsonSerializer.Deserialize(File.ReadAllText(jsonPath), FixerDataCotext.Default.HashChangeDataArray)!;
 	}
 	
