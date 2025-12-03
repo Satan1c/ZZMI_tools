@@ -10,11 +10,13 @@ using System.Text.RegularExpressions;
 if (args[0] is "-h" or "--help")
 {
 	Console.WriteLine("Options:");
-	Console.WriteLine("  -l, --logging [v|s|n]   Set logging mode: v - verbose, s - standard, n - none");
-	Console.WriteLine("  -p, --path \"[path]\"   Set the path to the Mods folder (default is current directory)");
+	Console.WriteLine("  -l, --logging [v|s|n]   Change logging mode: v - verbose, s - standard, n - none");
+	Console.WriteLine("  					     Default is verbose");
+	Console.WriteLine("  -p, --path \"[path]\"   Change the path to the Mods folder with PlayerCharacterData.json");
+	Console.WriteLine("  					     Default is current directory");
 	Console.WriteLine("Commands:");
-	Console.WriteLine("  fix                      Run the fixer (default)");
-	Console.WriteLine("  undo                     Revert applied fix");
+	Console.WriteLine("  fix                     Run the fixer (default)");
+	Console.WriteLine("  undo                    Revert applied fix");
 	return;
 }
 
