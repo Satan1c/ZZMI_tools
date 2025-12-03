@@ -1,4 +1,8 @@
-﻿using System.Runtime.InteropServices;
+﻿#if DEBUG
+using System.Diagnostics;
+#endif
+
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -15,7 +19,7 @@ public static class Generator
 			.AsParallel()
 			.OrderBy(x => x.name).ThenBy(x => x.date)
 			.Select(x => (x.date, x.name,
-				JsonSerializer.Deserialize<Component[]>(x.data, DumpContext.Default.ComponentArray)!));
+				JsonSerializer.Deserialize(x.data, DumpContext.Default.ComponentArray)!));
 		var dict = new Dictionary<string, List<Component[]>>();
 		foreach (var (_, name, components) in parsed)
 		{
@@ -349,4 +353,3 @@ internal sealed class ChangesData
 [JsonSerializable(typeof(Dictionary<string, Dictionary<string, Changes>>))]
 [JsonSourceGenerationOptions(WriteIndented = true, IndentCharacter = '\t', IndentSize = 1, IncludeFields = true, DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull)]
 internal partial class DumpContext : JsonSerializerContext;
-

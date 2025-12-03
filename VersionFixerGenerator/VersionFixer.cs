@@ -61,11 +61,11 @@ public static partial class Program
 	private static partial Regex GetHashRegex();
 	private static readonly Regex HashRegex = GetHashRegex();
 
-	private static HashChangeData[] _data;
+	private static HashChangeData[] _data = null!;
 
 	private static void ReadData(string jsonPath)
 	{
-		_data = JsonSerializer.Deserialize<HashChangeData[]>(jsonPath, FixerDataCotext.Default.HashChangeDataArray)!;
+		_data = JsonSerializer.Deserialize(File.ReadAllText(jsonPath), FixerDataCotext.Default.HashChangeDataArray)!;
 	}
 	
 	private static void Run(string iniPath)
