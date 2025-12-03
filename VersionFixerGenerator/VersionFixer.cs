@@ -27,7 +27,7 @@ if (args.Any(x => x is "-l" or "--logging"))
 	{
 		var mode = args[index + 1][0];
 		if (mode is 'v' or 's' or 'n')
-			Logger.loggingMode = mode switch
+			Logger.LoggingMode = mode switch
 			{
 				'v' => LogSeverity.Verbose,
 				's' => LogSeverity.Standard,
@@ -52,6 +52,11 @@ else
 }
 if (string.IsNullOrEmpty(hashesPath))
 	hashesPath = Directory.GetCurrentDirectory();
+if (!Directory.Exists(hashesPath))
+{
+	Console.WriteLine("Provided path does not exist, exiting.");
+	return;
+}
 
 Directory.SetCurrentDirectory(hashesPath);
 
@@ -108,7 +113,7 @@ if (_data is null)
 	Console.WriteLine("No data was loaded, exiting.");
 	return;
 }
-
+Logger.Log();
 foreach (var path in Directory.EnumerateFiles(Directory.GetCurrentDirectory(), "*.ini", SearchOption.AllDirectories))
 {
 	if (Path.GetFileName(path).StartsWith("disabled", StringComparison.InvariantCultureIgnoreCase))
@@ -116,10 +121,12 @@ foreach (var path in Directory.EnumerateFiles(Directory.GetCurrentDirectory(), "
 	if (Path.GetDirectoryName(path)?.Replace('\\', '/').Split('/').Any(x => x.StartsWith("disabled", StringComparison.InvariantCultureIgnoreCase)) ?? false)
 		continue;
 	
-	Logger.Log(LogSeverity.Verbose, "Found ini:");
-	Logger.Log(LogSeverity.Verbose, path);
+	if (Logger.LoggingMode == LogSeverity.Verbose)
+	{
+		Logger.Log(LogSeverity.Verbose, "Found ini:");
+		Logger.Log(LogSeverity.Verbose, path);
+	}
 	Run(path);
-	Logger.Log(LogSeverity.Verbose);
 }
 
 Logger.Log("Done");
@@ -164,6 +171,8 @@ public static partial class Program
 	{
 		var iniLines = File.ReadLines(iniPath, Encoding.UTF8).ToArray();
 		var newIniLines = new string[iniLines.Length];
+
+		var sb = new StringBuilder();
 		
 		var changed = false;
 		for (var i = 0; i < iniLines.Length; i++)
@@ -193,8 +202,7 @@ public static partial class Program
 				{
 					changed = true;
 					line = $"{match.Groups["front"].Value}hash = {hash}";
-					Logger.Log("Found hash to change: ");
-					Logger.Log($"{match.Groups["hash"].Value} -> {hash}");
+					sb.Append($"Found hash to change: \n\t{match.Groups["hash"].Value} -> {hash}\n");
 				}
 			}
 	
@@ -203,6 +211,11 @@ public static partial class Program
 		
 		if (!changed)
 			return;
+		if (Logger.LoggingMode == LogSeverity.Standard)
+		{
+			sb.Append($"Found ini:\n\t{iniPath}");
+		}
+		Logger.Log(sb.Append('\n').ToString());
 		
 		var fileName = Path.GetFileName(iniPath);
 		var backIniPath =
@@ -230,7 +243,7 @@ public static partial class Program
 
 internal static class Logger
 {
-	internal static LogSeverity loggingMode = LogSeverity.Verbose;
+	internal static LogSeverity LoggingMode = LogSeverity.Standard;
 
 	public static void Log(string message = null)
 	{
@@ -239,7 +252,7 @@ internal static class Logger
 	
 	public static void Log(LogSeverity severity, string message = null)
 	{
-		if (loggingMode.HasFlag(severity))
+		if (LoggingMode.HasFlag(severity))
 		{
 			Console.WriteLine(message ?? string.Empty);
 		}
