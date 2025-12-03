@@ -7,18 +7,71 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 
-Console.Write("Enter the path to Mods folder\nwhere mods and PlayerCharacterData.json is located\n(leave empty for current directory): ");
-var hashesPath = Console.ReadLine();
+if (args[0] is "-h" or "--help")
+{
+	Console.WriteLine("Options:");
+	Console.WriteLine("  -l, --logging [v|s|n]   Set logging mode: v - verbose, s - standard, n - none");
+	Console.WriteLine("  -p, --path \"[path]\"   Set the path to the Mods folder");
+	Console.WriteLine("Commands:");
+	Console.WriteLine("  fix                      Run the fixer (default)");
+	Console.WriteLine("  undo                     Revert applied fix");
+	return;
+}
+
+if (args.Any(x => x is "-l" or "--logging"))
+{
+	var index = args.IndexOf("-l", "--logging");
+	if (index is not -1)
+	{
+		var mode = args[index + 1][0];
+		if (mode is 'v' or 's' or 'n')
+			Logger.loggingMode = mode switch
+			{
+				'v' => LogSeverity.Verbose,
+				's' => LogSeverity.Standard,
+				_ => LogSeverity.None
+			};
+	}
+}
+
+string hashesPath = null;
+if (args.Any(x => x is "-p" or "--path"))
+{
+	var index = args.IndexOf("-p", "--path");
+	if (index is not -1)
+	{
+		hashesPath = args[index];
+	}
+}
+else
+{
+	Console.Write("Enter the path to Mods folder\nwhere mods and PlayerCharacterData.json is located\n(leave empty for current directory): ");
+	hashesPath = Console.ReadLine();
+}
 if (string.IsNullOrEmpty(hashesPath))
 	hashesPath = Directory.GetCurrentDirectory();
 
 Directory.SetCurrentDirectory(hashesPath);
 
-Console.Write("\nChose action:\nfix - to run fixer\nundo - to revert applied fix\n(leave empty for fix): ");
-var action = Console.ReadLine();
+string action;
+if (args.Any(x => x is "fix" or "undo"))
+{
+	var index = args.IndexOf("fix", "undo");
+	if (index is -1)
+	{
+		Console.WriteLine("No command was specified, exiting.");
+		return;
+	}
+	action = args[index];
+}
+else
+{
+	Console.Write("\nChose action:\nfix - to run fixer\nundo - to revert applied fix\n(leave empty for fix): ");
+	action = Console.ReadLine();
+}
 if (action == "undo")
 {
-	Console.WriteLine("Undoing changes...");
+	Logger.Log(LogSeverity.Verbose, "Undoing changes...");
 	foreach (var path in Directory.EnumerateFiles(Directory.GetCurrentDirectory(), "DISABLED_versionfix_*.ini", SearchOption.AllDirectories))
 	{
 		var match = FilenameRegex.Match(Path.GetFileName(path));
@@ -31,15 +84,15 @@ if (action == "undo")
 			File.Delete(originalPath);
 		}
 		File.Move(path, originalPath);
-		Console.WriteLine($"Restored: {originalPath}");
+		Logger.Log($"Restored: {originalPath}");
 	}
-	Console.WriteLine("Undo complete.");
+	Logger.Log("Undo complete.");
 	return;
 }
 
-Console.WriteLine("base path");
-Console.WriteLine(hashesPath);
-Console.WriteLine();
+Logger.Log(LogSeverity.Verbose, "base path");
+Logger.Log(LogSeverity.Verbose, hashesPath);
+Logger.Log(LogSeverity.Verbose);
 
 #if GENERATOR
 Generator.SaveTo = Path.Combine(hashesPath, "PlayerCharacterData.json");
@@ -57,13 +110,16 @@ foreach (var path in Directory.EnumerateFiles(Directory.GetCurrentDirectory(), "
 {
 	if (Path.GetFileName(path).StartsWith("disabled", StringComparison.InvariantCultureIgnoreCase))
 		continue;
-	Console.WriteLine("Found ini:");
-	Console.WriteLine(path);
+	if (Path.GetDirectoryName(path)?.Replace('\\', '/').Split('/').Any(x => x.StartsWith("disabled", StringComparison.InvariantCultureIgnoreCase)) ?? false)
+		continue;
+	
+	Logger.Log(LogSeverity.Verbose, "Found ini:");
+	Logger.Log(LogSeverity.Verbose, path);
 	Run(path);
-	Console.WriteLine();
+	Logger.Log(LogSeverity.Verbose);
 }
 
-Console.WriteLine("Done");
+Logger.Log("Done");
 Console.ReadKey();
 
 internal sealed class HashChangeData
@@ -125,12 +181,12 @@ public static partial class Program
 					hash = tempHash.To;
 				}
 		
-				if (index > 0)
+				if (index > 0 && hash != match.Groups["hash"].Value)
 				{
 					changed = true;
 					line = $"{match.Groups["front"].Value}hash = {hash}";
-					Console.Write("Found hash to change: ");
-					Console.WriteLine($"{match.Groups["hash"].Value} -> {hash}");
+					Logger.Log("Found hash to change: ");
+					Logger.Log($"{match.Groups["hash"].Value} -> {hash}");
 				}
 			}
 	
@@ -151,4 +207,41 @@ public static partial class Program
 		}
 		File.WriteAllLines(iniPath, newIniLines, Encoding.UTF8);
 	}
+	
+	private static int IndexOf<T>(this T[] source, T option1, T option2)
+	{
+		return source.AsSpan().IndexOf(option1, option2);
+	}
+	private static int IndexOf<T>(this Span<T> source, T option1, T option2)
+	{
+		var index = source.IndexOf(option1);
+		index = index is -1 ? source.IndexOf(option2) : index;
+		return index;
+	}
+}
+
+internal static class Logger
+{
+	internal static LogSeverity loggingMode = LogSeverity.Verbose;
+
+	public static void Log(string message = null)
+	{
+		Log(LogSeverity.Standard, message ?? string.Empty);
+	}
+	
+	public static void Log(LogSeverity severity, string message = null)
+	{
+		if (loggingMode.HasFlag(severity))
+		{
+			Console.WriteLine(message ?? string.Empty);
+		}
+	}
+}
+
+[Flags]
+internal enum LogSeverity
+{
+	None = 1 << 1,
+	Standard = 1 << 2,
+	Verbose = None | Standard,
 }
