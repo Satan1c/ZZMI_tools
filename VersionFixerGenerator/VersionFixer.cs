@@ -7,7 +7,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 
-if (args[0] is "-h" or "--help")
+if (args.Any(x => x is "-h" or "--help"))
 {
 	Console.WriteLine("Options:");
 	Console.WriteLine("  -l, --logging [v|s|n]   Change logging mode: v - verbose, s - standard, n - none");
