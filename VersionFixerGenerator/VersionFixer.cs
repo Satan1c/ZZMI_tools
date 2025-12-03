@@ -11,9 +11,9 @@ if (args[0] is "-h" or "--help")
 {
 	Console.WriteLine("Options:");
 	Console.WriteLine("  -l, --logging [v|s|n]   Change logging mode: v - verbose, s - standard, n - none");
-	Console.WriteLine("  					     Default is verbose");
+	Console.WriteLine("                          Default is verbose");
 	Console.WriteLine("  -p, --path \"[path]\"   Change the path to the Mods folder with PlayerCharacterData.json");
-	Console.WriteLine("  					     Default is current directory");
+	Console.WriteLine("                          Default is current directory");
 	Console.WriteLine("Commands:");
 	Console.WriteLine("  fix                     Run the fixer (default)");
 	Console.WriteLine("  undo                    Revert applied fix");
@@ -102,6 +102,12 @@ ReadData(Generator.SaveTo);
 #else
 ReadData(Path.Combine(hashesPath, "PlayerCharacterData.json"));
 #endif
+
+if (_data is null)
+{
+	Console.WriteLine("No data was loaded, exiting.");
+	return;
+}
 
 foreach (var path in Directory.EnumerateFiles(Directory.GetCurrentDirectory(), "*.ini", SearchOption.AllDirectories))
 {
