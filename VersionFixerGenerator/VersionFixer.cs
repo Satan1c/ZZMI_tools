@@ -7,6 +7,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 
+Console.Write("Enter the path to Mods folder\nwhere mods and PlayerCharacterData.json is located\n(leave empty for current directory): ");
 var hashesPath = Console.ReadLine();
 if (string.IsNullOrEmpty(hashesPath))
 	hashesPath = Directory.GetCurrentDirectory();
