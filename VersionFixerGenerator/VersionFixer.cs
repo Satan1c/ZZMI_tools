@@ -7,33 +7,26 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 
-if (args.Any(x => x is "-h" or "--help"))
+void LogOptions(bool cli = true)
 {
 	Console.WriteLine("Options:");
+	if (cli)
+	{
+		Console.WriteLine("  -p, --path \"[path]\"   Change the path to the Mods folder with PlayerCharacterData.json");
+		Console.WriteLine("                          Default is current directory");
+	}
 	Console.WriteLine("  -l, --logging [v|s|n]   Change logging mode: v - verbose, s - standard, n - none");
 	Console.WriteLine("                          Default is standard");
-	Console.WriteLine("  -p, --path \"[path]\"   Change the path to the Mods folder with PlayerCharacterData.json");
-	Console.WriteLine("                          Default is current directory");
+	Console.WriteLine("  -nd, --nodisable        Do not process files/folders with disabled prefix");
+}
+
+if (args.Any(x => x is "-h" or "--help"))
+{
+	LogOptions();
 	Console.WriteLine("Commands:");
 	Console.WriteLine("  fix                     Run the fixer (default)");
 	Console.WriteLine("  undo                    Revert applied fix");
 	return;
-}
-
-if (args.Any(x => x is "-l" or "--logging"))
-{
-	var index = args.IndexOf("-l", "--logging");
-	if (index is not -1)
-	{
-		var mode = args[index + 1][0];
-		if (mode is 'v' or 's' or 'n')
-			Logger.LoggingMode = mode switch
-			{
-				'v' => LogSeverity.Verbose,
-				's' => LogSeverity.Standard,
-				_ => LogSeverity.None
-			};
-	}
 }
 
 string hashesPath = null;
@@ -68,9 +61,37 @@ if (args.Any(x => x is "fix" or "undo"))
 }
 else
 {
+	LogOptions(false);
 	Console.Write("\nChose action:\nfix - to run fixer\nundo - to revert applied fix\n(leave empty for fix): ");
 	action = Console.ReadLine();
+	var split = action!.Split(' ');
+	if (split.Length > 0)
+	{
+		args = split.Skip(1).ToArray();
+	}
 }
+
+if (args.Any(x => x is "-l" or "--logging"))
+{
+	var index = args.IndexOf("-l", "--logging");
+	if (index is not -1)
+	{
+		var mode = args[index + 1][0];
+		if (mode is 'v' or 's' or 'n')
+			Logger.LoggingMode = mode switch
+			{
+				'v' => LogSeverity.Verbose,
+				's' => LogSeverity.Standard,
+				_ => LogSeverity.None
+			};
+	}
+}
+
+if (args.Any(x => x is "-nd" or "--nodisable"))
+{
+	IsProcessDisabled = false;
+}
+
 if (action == "undo")
 {
 	Logger.Log(LogSeverity.Verbose, "Undoing changes...");
@@ -89,12 +110,13 @@ if (action == "undo")
 		Logger.Log($"Restored: {originalPath}");
 	}
 	Logger.Log("Undo complete.");
-	return;
 }
+else if (action == "fix")
+{
 
-Logger.Log(LogSeverity.Verbose, "base path");
-Logger.Log(LogSeverity.Verbose, hashesPath);
-Logger.Log(LogSeverity.Verbose);
+	Logger.Log(LogSeverity.Verbose, "base path");
+	Logger.Log(LogSeverity.Verbose, hashesPath);
+	Logger.Log(LogSeverity.Verbose);
 
 #if GENERATOR
 Generator.SaveTo = Path.Combine(hashesPath, "PlayerCharacterData.json");
@@ -105,32 +127,42 @@ Generator.Run(await GithubGrabber.Run());
 #endif
 ReadData(Generator.SaveTo);
 #else
-ReadData(Path.Combine(hashesPath, "PlayerCharacterData.json"));
+	ReadData(Path.Combine(hashesPath, "PlayerCharacterData.json"));
 #endif
 
-if (_data is null)
-{
-	Console.WriteLine("No data was loaded, exiting.");
-	return;
-}
-Logger.Log();
-foreach (var path in Directory.EnumerateFiles(Directory.GetCurrentDirectory(), "*.ini", SearchOption.AllDirectories))
-{
-	if (Path.GetFileName(path).StartsWith("disabled", StringComparison.InvariantCultureIgnoreCase))
-		continue;
-	if (Path.GetDirectoryName(path)?.Replace('\\', '/').Split('/').Any(x => x.StartsWith("disabled", StringComparison.InvariantCultureIgnoreCase)) ?? false)
-		continue;
-	
-	if (Logger.LoggingMode == LogSeverity.Verbose)
+	if (_data is null)
 	{
-		Logger.Log(LogSeverity.Verbose, "Found ini:");
-		Logger.Log(LogSeverity.Verbose, path);
+		Console.WriteLine("No data was loaded, exiting.");
+		return;
 	}
-	Run(path);
-}
 
-Logger.Log("Done");
-Console.ReadKey();
+	Logger.Log();
+	foreach (var path in
+	         Directory.EnumerateFiles(Directory.GetCurrentDirectory(), "*.ini", SearchOption.AllDirectories))
+	{
+		if (Path.GetFileName(path).StartsWith("disabled", StringComparison.InvariantCultureIgnoreCase) && !IsProcessDisabled)
+			continue;
+		var replacedPathSplit = Path.GetDirectoryName(path)?.Replace('\\', '/').Split('/') ?? [];
+		switch (IsProcessDisabled)
+		{
+			case false when replacedPathSplit.Any(x => x.StartsWith("disabled", StringComparison.InvariantCultureIgnoreCase)):
+			case true when replacedPathSplit.Any(x => x.StartsWith("disabled_versionfix_", StringComparison.InvariantCultureIgnoreCase)):
+				continue;
+		}
+
+
+		if (Logger.LoggingMode == LogSeverity.Verbose)
+		{
+			Logger.Log(LogSeverity.Verbose, "Found ini:");
+			Logger.Log(LogSeverity.Verbose, path);
+		}
+
+		Run(path);
+	}
+
+	Logger.Log("Done");
+	Console.ReadKey();
+}
 
 internal sealed class HashChangeData
 {
@@ -156,6 +188,7 @@ public static partial class Program
 	private static readonly Regex FilenameRegex = GetFilenameRegex();
 
 	private static HashChangeData[] _data = null!;
+	private static bool IsProcessDisabled = true;
 
 	private static void ReadData(string jsonPath)
 	{
