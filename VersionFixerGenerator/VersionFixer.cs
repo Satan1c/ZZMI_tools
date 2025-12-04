@@ -7,19 +7,6 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 
-void LogOptions(bool cli = true)
-{
-	Console.WriteLine("Options:");
-	if (cli)
-	{
-		Console.WriteLine("  -p, --path \"[path]\"   Change the path to the Mods folder with PlayerCharacterData.json");
-		Console.WriteLine("                          Default is current directory");
-	}
-	Console.WriteLine("  -l, --logging [v|s|n]   Change logging mode: v - verbose, s - standard, n - none");
-	Console.WriteLine("                          Default is standard");
-	Console.WriteLine("  -nd, --nodisable        Do not process files/folders with disabled prefix");
-}
-
 if (args.Any(x => x is "-h" or "--help"))
 {
 	LogOptions();
@@ -164,6 +151,7 @@ ReadData(Generator.SaveTo);
 	Console.ReadKey();
 }
 
+
 internal sealed class HashChangeData
 {
 	public string From { get; set; } = null!;
@@ -198,6 +186,19 @@ public static partial class Program
 			return;
 		}
 		_data = JsonSerializer.Deserialize(File.ReadAllText(jsonPath), FixerDataCotext.Default.HashChangeDataArray)!;
+	}
+	
+	private static void LogOptions(bool cli = true)
+	{
+		Console.WriteLine("Options:");
+		if (cli)
+		{
+			Console.WriteLine("  -p, --path \"[path]\"   Change the path to the Mods folder with PlayerCharacterData.json");
+			Console.WriteLine("                          Default is current directory");
+		}
+		Console.WriteLine("  -l, --logging [v|s|n]   Change logging mode: v - verbose, s - standard, n - none");
+		Console.WriteLine("                          Default is standard");
+		Console.WriteLine("  -nd, --nodisable        Do not process files/folders with disabled prefix");
 	}
 	
 	private static void Run(string iniPath)
