@@ -79,31 +79,33 @@ if (args.Any(x => x is "-nd" or "--nodisable"))
 	IsProcessDisabled = false;
 }
 
-if (action == "undo")
+switch (action)
 {
-	Logger.Log(LogSeverity.Verbose, "Undoing changes...");
-	foreach (var path in Directory.EnumerateFiles(Directory.GetCurrentDirectory(), "DISABLED_versionfix_*.ini", SearchOption.AllDirectories))
+	case "undo":
 	{
-		var match = FilenameRegex.Match(Path.GetFileName(path));
-		if (!match.Success)
-			continue;
-		
-		var originalPath = Path.Combine(Path.GetDirectoryName(path)!, match.Groups["name"].Value);
-		if (File.Exists(originalPath))
+		Logger.Log(LogSeverity.Verbose, "Undoing changes...");
+		foreach (var path in Directory.EnumerateFiles(Directory.GetCurrentDirectory(), "DISABLED_versionfix_*.ini", SearchOption.AllDirectories))
 		{
-			File.Delete(originalPath);
+			var match = FilenameRegex.Match(Path.GetFileName(path));
+			if (!match.Success)
+				continue;
+		
+			var originalPath = Path.Combine(Path.GetDirectoryName(path)!, match.Groups["name"].Value);
+			if (File.Exists(originalPath))
+			{
+				File.Delete(originalPath);
+			}
+			File.Move(path, originalPath);
+			Logger.Log($"Restored: {originalPath}");
 		}
-		File.Move(path, originalPath);
-		Logger.Log($"Restored: {originalPath}");
+		Logger.Log("Undo complete.");
+		break;
 	}
-	Logger.Log("Undo complete.");
-}
-else if (action == "fix")
-{
-
-	Logger.Log(LogSeverity.Verbose, "base path");
-	Logger.Log(LogSeverity.Verbose, hashesPath);
-	Logger.Log(LogSeverity.Verbose);
+	case "fix":
+	{
+		Logger.Log(LogSeverity.Verbose, "base path");
+		Logger.Log(LogSeverity.Verbose, hashesPath);
+		Logger.Log(LogSeverity.Verbose);
 
 #if GENERATOR
 Generator.SaveTo = Path.Combine(hashesPath, "PlayerCharacterData.json");
@@ -114,41 +116,43 @@ Generator.Run(await GithubGrabber.Run());
 #endif
 ReadData(Generator.SaveTo);
 #else
-	ReadData(Path.Combine(hashesPath, "PlayerCharacterData.json"));
+		ReadData(Path.Combine(hashesPath, "PlayerCharacterData.json"));
 #endif
 
-	if (_data is null)
-	{
-		Console.WriteLine("No data was loaded, exiting.");
-		return;
-	}
-
-	Logger.Log();
-	foreach (var path in
-	         Directory.EnumerateFiles(Directory.GetCurrentDirectory(), "*.ini", SearchOption.AllDirectories))
-	{
-		if (Path.GetFileName(path).StartsWith("disabled", StringComparison.InvariantCultureIgnoreCase) && !IsProcessDisabled)
-			continue;
-		var replacedPathSplit = Path.GetDirectoryName(path)?.Replace('\\', '/').Split('/') ?? [];
-		switch (IsProcessDisabled)
+		if (_data is null)
 		{
-			case false when replacedPathSplit.Any(x => x.StartsWith("disabled", StringComparison.InvariantCultureIgnoreCase)):
-			case true when replacedPathSplit.Any(x => x.StartsWith("disabled_versionfix_", StringComparison.InvariantCultureIgnoreCase)):
+			Console.WriteLine("No data was loaded, exiting.");
+			return;
+		}
+
+		Logger.Log();
+		foreach (var path in
+		         Directory.EnumerateFiles(Directory.GetCurrentDirectory(), "*.ini", SearchOption.AllDirectories))
+		{
+			if (Path.GetFileName(path).StartsWith("disabled", StringComparison.InvariantCultureIgnoreCase) && !IsProcessDisabled)
 				continue;
+			var replacedPathSplit = Path.GetDirectoryName(path)?.Replace('\\', '/').Split('/') ?? [];
+			switch (IsProcessDisabled)
+			{
+				case false when replacedPathSplit.Any(x => x.StartsWith("disabled", StringComparison.InvariantCultureIgnoreCase)):
+				case true when replacedPathSplit.Any(x => x.StartsWith("disabled_versionfix_", StringComparison.InvariantCultureIgnoreCase)):
+					continue;
+			}
+
+
+			if (Logger.LoggingMode == LogSeverity.Verbose)
+			{
+				Logger.Log(LogSeverity.Verbose, "Found ini:");
+				Logger.Log(LogSeverity.Verbose, path);
+			}
+
+			Run(path);
 		}
 
-
-		if (Logger.LoggingMode == LogSeverity.Verbose)
-		{
-			Logger.Log(LogSeverity.Verbose, "Found ini:");
-			Logger.Log(LogSeverity.Verbose, path);
-		}
-
-		Run(path);
+		Logger.Log("Done");
+		Console.ReadKey();
+		break;
 	}
-
-	Logger.Log("Done");
-	Console.ReadKey();
 }
 
 
