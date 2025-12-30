@@ -1,5 +1,55 @@
 ﻿[
 	{
+		"From": "860e1558",
+		"To": "d509bdd4",
+		"Comment": "1 BelleSunlight Body ib"
+	},
+	{
+		"From": "862dc27a",
+		"To": "d761e076",
+		"Comment": "1 BelleSunlight Body texcoord"
+	},
+	{
+		"From": "01b0c8b6",
+		"To": "f3dedb50",
+		"Comment": "1 BelleSunlight Body blend"
+	},
+	{
+		"From": "0b3c5e7c",
+		"To": "8a4e97cd",
+		"Comment": "1 BelleSunlight Body position"
+	},
+	{
+		"From": "02c9dc4b",
+		"To": "19e5f486",
+		"Comment": "1 BelleSunlight Body draw"
+	},
+	{
+		"From": "6acc1eb8",
+		"To": "1eca2097",
+		"Comment": "1 WiseCrane Body ib"
+	},
+	{
+		"From": "a83ada4e",
+		"To": "b39870e1",
+		"Comment": "1 WiseCrane Body texcoord"
+	},
+	{
+		"From": "177ad7e8",
+		"To": "8612559a",
+		"Comment": "1 WiseCrane Body blend"
+	},
+	{
+		"From": "ae59eabb ",
+		"To": "a388eb6b",
+		"Comment": "1 WiseCrane Body position"
+	},
+	{
+		"From": "4fa228f9",
+		"To": "ca02f614",
+		"Comment": "1 WiseCrane Body draw"
+	},
+	{
 		"From": "496a781d",
 		"To": "39538886",
 		"Comment": "1 Anby Hair texcoord"
@@ -268,6 +318,31 @@
 		"From": "5721e4e7",
 		"To": "2d06e785",
 		"Comment": "3 Jane Hair draw"
+	},
+	{
+		"From": "9268a5af",
+		"To": "3275b812",
+		"Comment": "4 Jane Hair ib"
+	},
+	{
+		"From": "8721477f",
+		"To": "e42171df",
+		"Comment": "4 Jane Hair blend"
+	},
+	{
+		"From": "e7a3b7dc",
+		"To": "33a09cfe",
+		"Comment": "4 Jane Hair position"
+	},
+	{
+		"From": "acec29f8",
+		"To": "fa617c9a",
+		"Comment": "4 Jane Hair texcoord"
+	},
+	{
+		"From": "2d06e785",
+		"To": "74bc0b7f",
+		"Comment": "4 Jane Hair draw"
 	},
 	{
 		"From": "e3021a32",
