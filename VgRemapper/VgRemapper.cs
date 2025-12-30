@@ -73,23 +73,48 @@ public static partial class Program
 		new Dictionary<string, Func<uint, uint>>()
 		{
 			{
-				"e91c93e0",
+				"3d7e53cf",
 				i => i switch
 				{
-					34 => 39,
-					35 => 34,
-					38 => 40,
-					39 => 35,
-					40 => 38,
-					41 => 42,
-					42 => 43,
-					43 => 44,
-					44 => 45,
-					45 => 46,
-					46 => 47,
-					47 => 41,
-					49 => 50,
-					50 => 49,
+					18 => 20,
+					19 => 18,
+					20 => 19,
+					
+					54 => 62,
+					55 => 54,
+					56 => 55,
+					57 => 56,
+					58 => 57,
+					59 => 58,
+					60 => 59,
+					61 => 60,
+					62 => 61,
+					
+					69 => 71,
+					70 => 72,
+					71 => 70,
+					72 => 69,
+					
+					91 => 98,
+					92 => 91,
+					93 => 92,
+					94 => 93,
+					95 => 94,
+					96 => 95,
+					97 => 96,
+					98 => 97,
+					
+					113 => 114,
+					114 => 113,
+					
+					128 => 129,
+					129 => 128,
+					130 => 132,
+					131 => 130,
+					132 => 131,
+					
+					188 => 189,
+					189 => 188,
 					_ => i
 				}
 			}
@@ -98,7 +123,7 @@ public static partial class Program
 	private static readonly FrozenDictionary<string, string> s_positionToBlend =
 		new Dictionary<string, string>
 		{
-			{ "ba0fe600", "e91c93e0" }
+			{ "ff36809b", "3d7e53cf" }
 		}.ToFrozenDictionary();
 
 	[GeneratedRegex(@"^hash ?= ?(?<Hash>\w{8})$", RegexOptions.IgnoreCase | RegexOptions.Multiline | RegexOptions.Compiled)]
