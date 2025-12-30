@@ -60,6 +60,11 @@
 		"Comment": "1 Corin Hair texcoord"
 	},
 	{
+		"From": "6ff0e4ad",
+		"To": "3d7e53cf",
+		"Comment": "1 Dialyn Body blend"
+	},
+	{
 		"From": "a72cfb34",
 		"To": "e30fae03",
 		"Comment": "1 Ellen Body ib"

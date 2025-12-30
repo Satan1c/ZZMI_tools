@@ -1,20 +1,16 @@
-//#define GENERATOR
-//#define GH_GRABBER
+#define GENERATOR
+#define GH_GRABBER
 //#define LOCAL_GRABBER
 
+#if GENERATOR
+using VersionFixerGenerator;
+#else
 using System.Text;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
+#endif
+using System.Text.Json.Serialization;
 
-if (args.Any(x => x is "-h" or "--help"))
-{
-	LogOptions();
-	Console.WriteLine("Commands:");
-	Console.WriteLine("  fix                     Run the fixer (default)");
-	Console.WriteLine("  undo                    Revert applied fix");
-	return;
-}
 
 string hashesPath = null;
 if (args.Any(x => x is "-p" or "--path"))
@@ -39,6 +35,27 @@ if (!Directory.Exists(hashesPath))
 }
 
 Directory.SetCurrentDirectory(hashesPath);
+
+#if GENERATOR
+Generator.SaveTo = Path.Combine(hashesPath, "PlayerCharacterData.json");
+if (!File.Exists(Generator.SaveTo))
+{
+	File.Create(Generator.SaveTo).Close();
+}
+#if GH_GRABBER
+Generator.Run(await GithubGrabber.Run());
+#elif LOCAL_GRABBER
+Generator.Run(await GithubGrabber.Run());
+#endif
+#else
+if (args.Any(x => x is "-h" or "--help"))
+{
+	LogOptions();
+	Console.WriteLine("Commands:");
+	Console.WriteLine("  fix                     Run the fixer (default)");
+	Console.WriteLine("  undo                    Revert applied fix");
+	return;
+}
 
 string action;
 if (args.Any(x => x is "fix" or "undo"))
@@ -106,18 +123,8 @@ switch (action)
 		Logger.Log(LogSeverity.Verbose, "base path");
 		Logger.Log(LogSeverity.Verbose, hashesPath);
 		Logger.Log(LogSeverity.Verbose);
-
-#if GENERATOR
-Generator.SaveTo = Path.Combine(hashesPath, "PlayerCharacterData.json");
-#if GH_GRABBER
-Generator.Run(await GithubGrabber.Run());
-#elif LOCAL_GRABBER
-Generator.Run(await GithubGrabber.Run());
-#endif
-ReadData(Generator.SaveTo);
-#else
+		
 		ReadData(Path.Combine(hashesPath, "PlayerCharacterData.json"));
-#endif
 
 		if (_data is null)
 		{
@@ -126,8 +133,7 @@ ReadData(Generator.SaveTo);
 		}
 
 		Logger.Log();
-		foreach (var path in
-		         Directory.EnumerateFiles(Directory.GetCurrentDirectory(), "*.ini", SearchOption.AllDirectories))
+		foreach (var path in Directory.EnumerateFiles(Directory.GetCurrentDirectory(), "*.ini", SearchOption.AllDirectories))
 		{
 			if (Path.GetFileName(path).StartsWith("disabled", StringComparison.InvariantCultureIgnoreCase) && !IsProcessDisabled)
 				continue;
@@ -154,20 +160,6 @@ ReadData(Generator.SaveTo);
 		break;
 	}
 }
-
-
-internal sealed class HashChangeData
-{
-	public string From { get; set; } = null!;
-	public string To { get; set; } = null!;
-	public string Comment { get; set; } = null!;
-}
-
-[JsonSerializable(typeof(HashChangeData))]
-[JsonSerializable(typeof(List<HashChangeData>))]
-[JsonSerializable(typeof(HashChangeData[]))]
-[JsonSourceGenerationOptions(WriteIndented = true, IndentCharacter = '\t', IndentSize = 1, IncludeFields = true, DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull)]
-internal partial class FixerDataCotext : JsonSerializerContext;
 
 public static partial class Program
 {
@@ -267,16 +259,7 @@ public static partial class Program
 		File.WriteAllLines(iniPath, newIniLines, Encoding.UTF8);
 	}
 	
-	private static int IndexOf<T>(this T[] source, T option1, T option2)
-	{
-		return source.AsSpan().IndexOf(option1, option2);
-	}
-	private static int IndexOf<T>(this Span<T> source, T option1, T option2)
-	{
-		var index = source.IndexOf(option1);
-		index = index is -1 ? source.IndexOf(option2) : index;
-		return index;
-	}
+	
 }
 
 internal static class Logger
@@ -304,3 +287,37 @@ internal enum LogSeverity
 	Standard = 1 << 2,
 	Verbose = None | Standard,
 }
+#endif
+
+public static partial class Program
+{
+	extension<T>(T[] source)
+	{
+		private int IndexOf(T option1, T option2)
+		{
+			return source.AsSpan().IndexOf(option1, option2);
+		}
+	}
+
+	extension<T>(Span<T> source)
+	{
+		private int IndexOf(T option1, T option2)
+		{
+			var index = source.IndexOf(option1);
+			return index == -1 ? source.IndexOf(option2) : index;
+		}
+	}
+}
+
+internal sealed class HashChangeData
+{
+	public string From { get; set; } = null!;
+	public string To { get; set; } = null!;
+	public string Comment { get; set; } = null!;
+}
+
+[JsonSerializable(typeof(HashChangeData))]
+[JsonSerializable(typeof(List<HashChangeData>))]
+[JsonSerializable(typeof(HashChangeData[]))]
+[JsonSourceGenerationOptions(WriteIndented = true, IndentCharacter = '\t', IndentSize = 1, IncludeFields = true, DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull)]
+internal partial class FixerDataCotext : JsonSerializerContext;
