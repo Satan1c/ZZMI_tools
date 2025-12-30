@@ -1,5 +1,5 @@
-#define GENERATOR
-#define GH_GRABBER
+//#define GENERATOR
+//#define GH_GRABBER
 //#define LOCAL_GRABBER
 
 #if GENERATOR
@@ -68,10 +68,12 @@ else
 	LogOptions(false);
 	Console.Write("\nChose action:\nfix - to run fixer\nundo - to revert applied fix\n(leave empty for fix): ");
 	action = Console.ReadLine();
+	action = string.IsNullOrEmpty(action) ? "fix" : action;
 	var split = action!.Split(' ');
-	if (split.Length > 0)
+	if (split.Length > 1)
 	{
 		args = split.Skip(1).ToArray();
+		action = split[0];
 	}
 }
 
