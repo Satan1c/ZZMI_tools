@@ -184,8 +184,9 @@ public static partial class Program
 				
 				break;
 			}
-
-			resourceNamesMap[hash] = CollectionsMarshal.AsSpan(resourceNames).ToArray();
+			
+			if (resourceNames.Count > 0)
+				resourceNamesMap[hash] = CollectionsMarshal.AsSpan(resourceNames).ToArray();
 		}
 
 		return resourceNamesMap;
