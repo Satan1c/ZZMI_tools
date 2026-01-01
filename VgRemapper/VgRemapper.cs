@@ -144,13 +144,84 @@ public static partial class Program
 					126 => 68,
 					_ => i
 				}
+			},
+			{
+				"d06a9206",
+				i => i switch
+				{
+					4 => 0,
+					5 => 1,
+					6 => 2,
+					7 => 3,
+					8 => 4,
+					9 => 5,
+					10 => 6,
+					11 => 7,
+					12 => 8,
+					13 => 9,
+					14 => 10,
+					15 => 11,
+					16 => 12,
+					17 => 13,
+					18 => 14,
+					19 => 15,
+					20 => 16,
+					21 => 17,
+					22 => 18,
+					23 => 19,
+					24 => 20,
+					25 => 21,
+					
+					54 => 22,
+					55 => 23,
+					56 => 24,
+					57 => 25,
+					58 => 26,
+					59 => 27,
+					60 => 28,
+					61 => 29,
+					62 => 30,
+					63 => 31,
+					64 => 32,
+					65 => 33,
+					66 => 34,
+					67 => 35,
+					68 => 36,
+					69 => 37,
+					70 => 38,
+					71 => 39,
+					72 => 40,
+					73 => 41,
+					74 => 42,
+					75 => 43,
+					76 => 44,
+					77 => 45,
+					78 => 46,
+					79 => 47,
+					80 => 48,
+					81 => 49,
+					82 => 50,
+					83 => 51,
+					84 => 52,
+					85 => 53,
+					86 => 54,
+					87 => 55,
+					88 => 56,
+					89 => 57,
+					
+					127 => 58,
+					128 => 59,
+					129 => 60,
+					_ => i
+				}
 			}
 		}.ToFrozenDictionary();
 
 	private static readonly FrozenDictionary<string, string> s_positionToBlend =
 		new Dictionary<string, string>
 		{
-			{ "33a09cfe", "e42171df" }
+			{ "33a09cfe", "e42171df" },
+			{ "82e7c056", "d06a9206" }
 		}.ToFrozenDictionary();
 
 	[GeneratedRegex(@"^hash ?= ?(?<Hash>\w{8})$", RegexOptions.IgnoreCase | RegexOptions.Multiline | RegexOptions.Compiled)]
