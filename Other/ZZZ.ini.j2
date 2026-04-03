@@ -1,59 +1,20 @@
 {% extends "base.ini.j2" %}
 
-{% block constantscredit %}
-	{% if credit != "" %}
-		[Constants]
-		global $active = 0
-		global $creditinfo = 0
-
-		[Present]
-		post $active = 0
-		run = CommandListCreditInfo
-	{% endif %}
-{% endblock %}
-
-{% block commandlistscredit %}
-	{% if credit != "" %}
-		[CommandListCreditInfo]
-		if $creditinfo == 0 && $active > 0
-			pre Resource\ShaderFixes\help.ini\Notification = ResourceCreditInfo
-			pre run = CustomShader\ShaderFixes\help.ini\FormatText
-			pre $\ShaderFixes\help.ini\notification_timeout = time + 5.0
-			$creditinfo = 1
-		endif
-	{% endif %}
-{% endblock %}
-
-{% block resourcecredit %}
-	{% if credit != "" %}
-		[ResourceCreditInfo]
-		type = Buffer
-		data = "Created by {{ credit }}"
-	{% endif %}
-{% endblock %}
-
 {% block overridesbuffers %}
 	{% for component in mod_file.components if component.draw_vb != "" and component.blend_vb != "" and component.vertex_count > 0 %}
-		{% set vertex_count = component.parts[0].objects[0].obj.get("3DMigoto:VertexCount", 0) %}
 		[TextureOverride {{character_name}} {{component.name}} Blend]
 		hash = {{ component.blend_vb }}
-		{% if vertex_count > 0 %}
-			match_vertex_count = {{vertex_count}}
-		{% endif %}
 		handling = skip
-		vb2 = Resource.{{component.name}}.Blend
-		if DRAW_TYPE == 1
+		local $draw_type = DRAW_TYPE
+		if $draw_type == 2 || $draw_type == 4
+			vb1 = Resource.{{component.name}}.Texcoord
+			vb2 = Resource.{{component.name}}.Blend
+			CheckTextureOverride = ib
+		elif $draw_type == 1
 			vb0 = Resource.{{component.name}}.Position
+			vb2 = Resource.{{component.name}}.Blend
 			Draw = {{ component.vertex_count }}, 0
-			{% if credit != "" %}
-
-				$active = 1
-			{% endif %}
 		endif
-
-		[TextureOverride {{character_name}} {{component.name}} Texcoord]
-		hash = {{ component.texcoord_vb }}
-		vb1 = Resource.{{component.name}}.Texcoord
 
 		[TextureOverride {{character_name}} {{component.name}} Draw]
 		hash = {{ component.draw_vb }}
@@ -65,9 +26,6 @@
 		[TextureOverride {{character_name}} {{component.name}}]
 		hash = {{ component.position_vb }}
 		vb0 = Resource.{{component.name}}
-		{% if credit != "" %}
-			$active = 1
-		{% endif %}
 
 	{% endfor %}
 {% endblock %}
@@ -75,11 +33,12 @@
 {% block overridesibs %}
 	{% for component in mod_file.components if component.draw_vb != "" %}
 		{% for part in component.parts if part.vertex_count > 0 %}
+			{% set index_count = part.objects[0].obj.get("3DMigoto:IndexCount", 0) %}
 			[TextureOverride {{character_name}} {{component.name}}{{part.name}}]
 			hash = {{ component.ib }}
 			match_first_index = {{ part.first_index }}
-			{% if part.index_count > 0 %}
-				match_index_count = {{part.index_count}}
+			{% if index_count > 0 %}
+				match_index_count = {{index_count}}
 			{% endif %}
 			handling = skip
 			ib = Resource.{{component.name}}{{part.name}}.IB
@@ -202,7 +161,6 @@
 {% endblock %}
 
 {% block constants %}
-	{{- self.constantscredit() -}}
 {% endblock %}
 
 {% block overrides %}
@@ -211,7 +169,8 @@
 {% endblock %}
 
 {% block commandlists %}
-	{{- self.commandlistscredit() -}}
+{% endblock %}
+{% block resourcecredit %}
 {% endblock %}
 
 {% block resources %}
