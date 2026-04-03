@@ -335,7 +335,7 @@ public static partial class Program
 		var name = file.Name;
 		var path = file.FullName;
 		var directory = file.Directory!.FullName;
-		file.CopyTo(Path.Combine(directory, $"remap_backup_{name}_{timestamp}"));
+		file.CopyTo(Path.Combine(directory, $"remap_backup_{timestamp}-{name}"));
 		File.WriteAllBytes(path, data);
 		_bytes = [];
 	}

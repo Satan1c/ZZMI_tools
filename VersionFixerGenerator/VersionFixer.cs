@@ -69,7 +69,7 @@ else
 	Console.Write("\nChose action:\nfix - to run fixer\nundo - to revert applied fix\n(leave empty for fix): ");
 	action = Console.ReadLine();
 	action = string.IsNullOrEmpty(action) ? "fix" : action;
-	var split = action!.Split(' ');
+	var split = action.Split(' ');
 	if (split.Length > 1)
 	{
 		args = split.Skip(1).ToArray();
@@ -95,7 +95,7 @@ if (args.Any(x => x is "-l" or "--logging"))
 
 if (args.Any(x => x is "-nd" or "--nodisable"))
 {
-	IsProcessDisabled = false;
+	_isProcessDisabled = false;
 }
 
 switch (action)
@@ -105,7 +105,7 @@ switch (action)
 		Logger.Log(LogSeverity.Verbose, "Undoing changes...");
 		foreach (var path in Directory.EnumerateFiles(Directory.GetCurrentDirectory(), "DISABLED_versionfix_*.ini", SearchOption.AllDirectories))
 		{
-			var match = FilenameRegex.Match(Path.GetFileName(path));
+			var match = FixerBackupFilenameRegex.Match(Path.GetFileName(path));
 			if (!match.Success)
 				continue;
 		
@@ -137,13 +137,13 @@ switch (action)
 		Logger.Log();
 		foreach (var path in Directory.EnumerateFiles(Directory.GetCurrentDirectory(), "*.ini", SearchOption.AllDirectories))
 		{
-			if (Path.GetFileName(path).StartsWith("disabled", StringComparison.InvariantCultureIgnoreCase) && !IsProcessDisabled)
+			if (Path.GetFileName(path).StartsWith("DISABLED") && !_isProcessDisabled)
 				continue;
 			var replacedPathSplit = Path.GetDirectoryName(path)?.Replace('\\', '/').Split('/') ?? [];
-			switch (IsProcessDisabled)
+			switch (_isProcessDisabled)
 			{
-				case false when replacedPathSplit.Any(x => x.StartsWith("disabled", StringComparison.InvariantCultureIgnoreCase)):
-				case true when replacedPathSplit.Any(x => x.StartsWith("disabled_versionfix_", StringComparison.InvariantCultureIgnoreCase)):
+				case false when replacedPathSplit.Any(x => x.StartsWith("DISABLED")):
+				case true when replacedPathSplit.Any(x => x.StartsWith("DISABLED_versionfix_")):
 					continue;
 			}
 
@@ -171,10 +171,10 @@ public static partial class Program
 	
 	[GeneratedRegex(@"DISABLED_versionfix_\d*-(?<name>.+\.ini)", RegexOptions.Compiled)]
 	private static partial Regex GetFilenameRegex();
-	private static readonly Regex FilenameRegex = GetFilenameRegex();
+	private static readonly Regex FixerBackupFilenameRegex = GetFilenameRegex();
 
-	private static HashChangeData[] _data = null!;
-	private static bool IsProcessDisabled = true;
+	private static HashChangeData[]? _data;
+	private static bool _isProcessDisabled = true;
 
 	private static void ReadData(string jsonPath)
 	{
@@ -268,12 +268,12 @@ internal static class Logger
 {
 	internal static LogSeverity LoggingMode = LogSeverity.Standard;
 
-	public static void Log(string message = null)
+	public static void Log(string? message = null)
 	{
 		Log(LogSeverity.Standard, message ?? string.Empty);
 	}
 	
-	public static void Log(LogSeverity severity, string message = null)
+	public static void Log(LogSeverity severity, string? message = null)
 	{
 		if (LoggingMode.HasFlag(severity))
 		{
