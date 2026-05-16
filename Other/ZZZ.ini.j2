@@ -5,12 +5,11 @@
 		[TextureOverride {{character_name}} {{component.name}} Blend]
 		hash = {{ component.blend_vb }}
 		handling = skip
-		local $draw_type = DRAW_TYPE
-		if $draw_type == 2 || $draw_type == 4
+		if DRAW_TYPE == 2 || DRAW_TYPE == 4
 			vb1 = Resource.{{component.name}}.Texcoord
 			vb2 = Resource.{{component.name}}.Blend
 			CheckTextureOverride = ib
-		elif $draw_type == 1
+		elif DRAW_TYPE == 1
 			vb0 = Resource.{{component.name}}.Position
 			vb2 = Resource.{{component.name}}.Blend
 			Draw = {{ component.vertex_count }}, 0
