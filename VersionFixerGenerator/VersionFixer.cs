@@ -1,7 +1,9 @@
-//#define GENERATOR
-//#define GH_GRABBER
+#define GENERATOR
+#define GH_GRABBER
 //#define LOCAL_GRABBER
 
+
+using System.Text.Json.Serialization;
 #if GENERATOR
 using VersionFixerGenerator;
 #else
@@ -9,25 +11,21 @@ using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 #endif
-using System.Text.Json.Serialization;
 
 
 string hashesPath = null;
 if (args.Any(x => x is "-p" or "--path"))
 {
 	var index = args.IndexOf("-p", "--path");
-	if (index is not -1)
-	{
-		hashesPath = args[index];
-	}
+	if (index is not -1) hashesPath = args[index];
 }
 else
 {
 	Console.Write("Enter the path to Mods folder\nwhere mods and PlayerCharacterData.json is located\n(leave empty for current directory): ");
 	hashesPath = Console.ReadLine();
 }
-if (string.IsNullOrEmpty(hashesPath))
-	hashesPath = Directory.GetCurrentDirectory();
+
+if (string.IsNullOrEmpty(hashesPath)) hashesPath = Directory.GetCurrentDirectory();
 if (!Directory.Exists(hashesPath))
 {
 	Console.WriteLine("Provided path does not exist, exiting.");
@@ -38,10 +36,7 @@ Directory.SetCurrentDirectory(hashesPath);
 
 #if GENERATOR
 Generator.SaveTo = Path.Combine(hashesPath, "PlayerCharacterData.json");
-if (!File.Exists(Generator.SaveTo))
-{
-	File.Create(Generator.SaveTo).Close();
-}
+if (!File.Exists(Generator.SaveTo)) File.Create(Generator.SaveTo).Close();
 #if GH_GRABBER
 Generator.Run(await GithubGrabber.Run());
 #elif LOCAL_GRABBER
@@ -165,13 +160,20 @@ switch (action)
 
 public static partial class Program
 {
-	[GeneratedRegex(@"^hash ?= ?(?<hash>\w{8})$", RegexOptions.Compiled | RegexOptions.Multiline)]
+	[GeneratedRegex(@"^hash\s*=\s*(?<hash>\w{8})$", RegexOptions.Compiled | RegexOptions.Multiline)]
 	private static partial Regex GetHashRegex();
 	private static readonly Regex HashRegex = GetHashRegex();
 	
 	[GeneratedRegex(@"DISABLED_versionfix_\d*-(?<name>.+\.ini)", RegexOptions.Compiled)]
 	private static partial Regex GetFilenameRegex();
 	private static readonly Regex FixerBackupFilenameRegex = GetFilenameRegex();
+	[GeneratedRegex(@"^match_first_index\s*=\s*(?<value>\d+)$", RegexOptions.Compiled | RegexOptions.Multiline)]
+	private static partial Regex GetMatchFirstIndexRegex();
+	private static readonly Regex MatchFirstIndexRegex = GetMatchFirstIndexRegex();
+
+	[GeneratedRegex(@"^match_index_count\s*=\s*(?<value>\d+)$", RegexOptions.Compiled | RegexOptions.Multiline)]
+	private static partial Regex GetMatchIndexCountRegex();
+	private static readonly Regex MatchIndexCountRegex = GetMatchIndexCountRegex();
 
 	private static HashChangeData[]? _data;
 	private static bool _isProcessDisabled = true;
@@ -207,13 +209,32 @@ public static partial class Program
 		var sb = new StringBuilder();
 		
 		var changed = false;
+		string? sectionIdentity = null;
 		for (var i = 0; i < iniLines.Length; i++)
 		{
 			var line = iniLines[i];
-			var match = HashRegex.Match(line.TrimStart());
+			var trimmed = line.TrimStart();
+			
+			if (trimmed.StartsWith('['))
+			{
+				sectionIdentity = null;
+				newIniLines[i] = line;
+				continue;
+			}
+		
+			var match = HashRegex.Match(trimmed);
 			if (match.Success)
 			{
 				var hash = match.Groups["hash"].Value;
+				
+				var identityEntry = _data.FirstOrDefault(x => x.From == hash || x.To == hash);
+				if (identityEntry is not null)
+				{
+					var parts = identityEntry.Comment.Split(' ');
+					if (parts.Length >= 4)
+						sectionIdentity = string.Join(' ', parts[1..^1]);
+				}
+				
 				ushort index = 0;
 
 				while(true)
@@ -221,12 +242,12 @@ public static partial class Program
 					var tempHash = _data.FirstOrDefault(x => x.From == hash);
 					if (tempHash is null)
 						break;
-					var tempIndex = ushort.Parse(tempHash.Comment.Split(' ')[0]);
+					var tempIndex = uint.Parse(tempHash.Comment.Split(' ')[0]);
 			
 					if (tempIndex <= index || hash == tempHash.To)
 						break;
 			
-					index = tempIndex;
+					index = (ushort)tempIndex;
 					hash = tempHash.To;
 				}
 		
@@ -237,7 +258,37 @@ public static partial class Program
 					sb.Append($"Found hash to change: \n\t{match.Groups["hash"].Value} -> {hash}\n");
 				}
 			}
-	
+			else if (sectionIdentity is not null)
+			{
+				var firstIndexMatch = MatchFirstIndexRegex.Match(trimmed);
+				if (firstIndexMatch.Success)
+				{
+					var value = firstIndexMatch.Groups["value"].Value;
+					var walked = WalkValue("object_indexes", sectionIdentity, value);
+					if (walked != value)
+					{
+						changed = true;
+						line = $"match_first_index = {walked}";
+						sb.Append($"Found object_indexes to change: \n\t{value} -> {walked}\n");
+					}
+				}
+				else
+				{
+					var indexCountMatch = MatchIndexCountRegex.Match(trimmed);
+					if (indexCountMatch.Success)
+					{
+						var value = indexCountMatch.Groups["value"].Value;
+						var walked = WalkValue("object_index_counts", sectionIdentity, value);
+						if (walked != value)
+						{
+							changed = true;
+							line = $"match_index_count = {walked}";
+							sb.Append($"Found object_index_counts to change: \n\t{value} -> {walked}\n");
+						}
+					}
+				}
+			}
+		
 			newIniLines[i] = line;
 		}
 		
@@ -259,6 +310,67 @@ public static partial class Program
 			File.Create(iniPath).Close();
 		}
 		File.WriteAllLines(iniPath, newIniLines, Encoding.UTF8);
+	}
+	private static string WalkValue(string kind, string identity, string startValue)
+	{
+		if (!uint.TryParse(startValue, out var current))
+			return startValue;
+		var lastCounter = (uint)0;
+		while (true)
+		{
+			HashChangeData? best = null;
+			var bestCounter = uint.MaxValue;
+			var bestPosition = -1;
+			foreach (var entry in _data)
+			{
+				var parts = entry.Comment.Split(' ');
+				if (parts.Length < 4 || parts[^1] != kind)
+					continue;
+				if (!uint.TryParse(parts[0], out var counter))
+					continue;
+				if (counter <= lastCounter)
+					continue;
+				if (string.Join(' ', parts[1..^1]) != identity)
+					continue;
+				var fromValues = ParseBracketArray(entry.From);
+				if (fromValues is null)
+					continue;
+				var position = Array.IndexOf(fromValues, current);
+				if (position == -1)
+					continue;
+				if (counter < bestCounter)
+				{
+					best = entry;
+					bestCounter = counter;
+					bestPosition = position;
+				}
+			}
+
+			if (best is null)
+				break;
+
+			var toValues = ParseBracketArray(best.To);
+			if (toValues is null || toValues.Length <= bestPosition)
+				break;
+
+			current = toValues[bestPosition];
+			lastCounter = bestCounter;
+		}
+		return current.ToString();
+	}
+
+	private static uint[]? ParseBracketArray(string value)
+	{
+		if (value.Length < 2 || value[0] != '[' || value[^1] != ']')
+			return null;
+		var parts = value[1..^1].Split(',');
+		var result = new uint[parts.Length];
+		for (var i = 0; i < parts.Length; i++)
+		{
+			if (!uint.TryParse(parts[i].Trim(), out result[i]))
+				return null;
+		}
+		return result;
 	}
 	
 	
@@ -295,10 +407,7 @@ public static partial class Program
 {
 	extension<T>(T[] source)
 	{
-		private int IndexOf(T option1, T option2)
-		{
-			return source.AsSpan().IndexOf(option1, option2);
-		}
+		private int IndexOf(T option1, T option2) { return source.AsSpan().IndexOf(option1, option2); }
 	}
 
 	extension<T>(Span<T> source)
@@ -321,5 +430,11 @@ internal sealed class HashChangeData
 [JsonSerializable(typeof(HashChangeData))]
 [JsonSerializable(typeof(List<HashChangeData>))]
 [JsonSerializable(typeof(HashChangeData[]))]
-[JsonSourceGenerationOptions(WriteIndented = true, IndentCharacter = '\t', IndentSize = 1, IncludeFields = true, DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull)]
+[JsonSourceGenerationOptions(
+	WriteIndented = true,
+	IndentCharacter = '\t',
+	IndentSize = 1,
+	IncludeFields = true,
+	DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+)]
 internal partial class FixerDataCotext : JsonSerializerContext;

@@ -19,23 +19,23 @@
 	</PropertyGroup>
 
 	<PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
-	  <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 	</PropertyGroup>
 
 	<PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-	  <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-	  <CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
-	  <DebugType>none</DebugType>
-	  <WarningLevel>0</WarningLevel>
-	  <PlatformTarget>AnyCPU</PlatformTarget>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+		<CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
+		<DebugType>none</DebugType>
+		<WarningLevel>0</WarningLevel>
+		<PlatformTarget>AnyCPU</PlatformTarget>
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <PackageReference Include="Octokit" Version="14.0.0" />
+		<PackageReference Include="Octokit" Version="14.0.0"/>
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Folder Include="PlayerCharacterData\" />
+		<Folder Include="PlayerCharacterData\"/>
 	</ItemGroup>
 
 </Project>

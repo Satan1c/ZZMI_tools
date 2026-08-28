@@ -1,55 +1,5 @@
 ﻿[
 	{
-		"From": "860e1558",
-		"To": "d509bdd4",
-		"Comment": "1 BelleSunlight Body ib"
-	},
-	{
-		"From": "862dc27a",
-		"To": "d761e076",
-		"Comment": "1 BelleSunlight Body texcoord"
-	},
-	{
-		"From": "01b0c8b6",
-		"To": "f3dedb50",
-		"Comment": "1 BelleSunlight Body blend"
-	},
-	{
-		"From": "0b3c5e7c",
-		"To": "8a4e97cd",
-		"Comment": "1 BelleSunlight Body position"
-	},
-	{
-		"From": "02c9dc4b",
-		"To": "19e5f486",
-		"Comment": "1 BelleSunlight Body draw"
-	},
-	{
-		"From": "6acc1eb8",
-		"To": "1eca2097",
-		"Comment": "1 WiseCrane Body ib"
-	},
-	{
-		"From": "a83ada4e",
-		"To": "b39870e1",
-		"Comment": "1 WiseCrane Body texcoord"
-	},
-	{
-		"From": "177ad7e8",
-		"To": "8612559a",
-		"Comment": "1 WiseCrane Body blend"
-	},
-	{
-		"From": "ae59eabb ",
-		"To": "a388eb6b",
-		"Comment": "1 WiseCrane Body position"
-	},
-	{
-		"From": "4fa228f9",
-		"To": "ca02f614",
-		"Comment": "1 WiseCrane Body draw"
-	},
-	{
 		"From": "496a781d",
 		"To": "39538886",
 		"Comment": "1 Anby Hair texcoord"
@@ -83,6 +33,151 @@
 		"From": "caf95576",
 		"To": "801edbf4",
 		"Comment": "1 Belle Body texcoord"
+	},
+	{
+		"From": "1817f3ca",
+		"To": "c2b4ce3a",
+		"Comment": "2 Belle Body ib"
+	},
+	{
+		"From": "c92a17d8",
+		"To": "3ee01622",
+		"Comment": "2 Belle Body blend"
+	},
+	{
+		"From": "d2844c01",
+		"To": "5838ad30",
+		"Comment": "2 Belle Body position"
+	},
+	{
+		"From": "801edbf4",
+		"To": "40a897ab",
+		"Comment": "2 Belle Body texcoord"
+	},
+	{
+		"From": "ac1c8f80",
+		"To": "bea2b94e",
+		"Comment": "2 Belle Body draw"
+	},
+	{
+		"From": "[0]",
+		"To": "[0,31275]",
+		"Comment": "2 Belle Body object_indexes"
+	},
+	{
+		"From": "bea4a483",
+		"To": "aa9ffb85",
+		"Comment": "3 Belle Hair ib"
+	},
+	{
+		"From": "cc32660c",
+		"To": "76a50b18",
+		"Comment": "3 Belle Hair blend"
+	},
+	{
+		"From": "a9673001",
+		"To": "71d2bf80",
+		"Comment": "3 Belle Hair position"
+	},
+	{
+		"From": "11e38ebb",
+		"To": "a5e62ece",
+		"Comment": "3 Belle Hair texcoord"
+	},
+	{
+		"From": "142ddbbc",
+		"To": "992d149f",
+		"Comment": "3 Belle Hair draw"
+	},
+	{
+		"From": "c2189ddf",
+		"To": "169e5f5d",
+		"Comment": "1 BelleSunlight BackRibbon ib"
+	},
+	{
+		"From": "83967fb0",
+		"To": "0d4e5810",
+		"Comment": "1 BelleSunlight BackRibbon blend"
+	},
+	{
+		"From": "903e5a55",
+		"To": "81bc55f3",
+		"Comment": "1 BelleSunlight BackRibbon position"
+	},
+	{
+		"From": "751107c4",
+		"To": "c5c88de1",
+		"Comment": "1 BelleSunlight BackRibbon texcoord"
+	},
+	{
+		"From": "f3dedb50",
+		"To": "4d74d5e9",
+		"Comment": "2 BelleSunlight Body blend"
+	},
+	{
+		"From": "c0fcc53d",
+		"To": "e850777c",
+		"Comment": "3 BelleSunlight Earring ib"
+	},
+	{
+		"From": "fc4bea64",
+		"To": "e1d5dec8",
+		"Comment": "3 BelleSunlight Earring position"
+	},
+	{
+		"From": "dde5eb66",
+		"To": "f3d824bf",
+		"Comment": "3 BelleSunlight Earring texcoord"
+	},
+	{
+		"From": "39ac6700",
+		"To": "8f7ae834",
+		"Comment": "5 BelleSunlight Hair blend"
+	},
+	{
+		"From": "db7add33",
+		"To": "f18dd23f",
+		"Comment": "6 BelleSunlight Hairpin blend"
+	},
+	{
+		"From": "f53b2eba",
+		"To": "922a7db6",
+		"Comment": "7 BelleSunlight Legs blend"
+	},
+	{
+		"From": "62ed56cc",
+		"To": "d0627e1f",
+		"Comment": "8 BelleSunlight Neck ib"
+	},
+	{
+		"From": "3bd79a0b",
+		"To": "0a11b1d7",
+		"Comment": "8 BelleSunlight Neck blend"
+	},
+	{
+		"From": "be75a4be",
+		"To": "e2ee9309",
+		"Comment": "8 BelleSunlight Neck position"
+	},
+	{
+		"From": "dd2b89aa",
+		"To": "2f7f6398",
+		"Comment": "8 BelleSunlight Neck texcoord"
+	},
+	{
+		"From": "4c215c73",
+		"To": "3f594476",
+		"Comment": "8 BelleSunlight Neck draw"
+	},
+	{
+		"From": "[0]",
+		"To": "[0,960]",
+		"Comment": "8 BelleSunlight Neck object_indexes"
+	},
+	{
+		"From": "[960]",
+		"To": "[960,36]",
+		"Comment": "8 BelleSunlight Neck object_index_counts"
 	},
 	{
 		"From": "a2f79d33",
@@ -205,6 +300,11 @@
 		"Comment": "1 Grace Body draw"
 	},
 	{
+		"From": "[0,42885]",
+		"To": "[0,42927]",
+		"Comment": "1 Grace Body object_indexes"
+	},
+	{
 		"From": "89d903ba",
 		"To": "d21f32ad",
 		"Comment": "2 Grace Hair texcoord"
@@ -292,57 +392,62 @@
 	{
 		"From": "c8ad344e",
 		"To": "257a90d6",
-		"Comment": "2 Jane Hair texcoord"
+		"Comment": "3 Jane Hair texcoord"
 	},
 	{
 		"From": "7b16a708",
 		"To": "9268a5af",
-		"Comment": "3 Jane Hair ib"
+		"Comment": "4 Jane Hair ib"
 	},
 	{
 		"From": "0a10c747",
 		"To": "8721477f",
-		"Comment": "3 Jane Hair blend"
+		"Comment": "4 Jane Hair blend"
 	},
 	{
 		"From": "24323bf9",
 		"To": "e7a3b7dc",
-		"Comment": "3 Jane Hair position"
+		"Comment": "4 Jane Hair position"
 	},
 	{
 		"From": "257a90d6",
 		"To": "acec29f8",
-		"Comment": "3 Jane Hair texcoord"
+		"Comment": "4 Jane Hair texcoord"
 	},
 	{
 		"From": "5721e4e7",
 		"To": "2d06e785",
-		"Comment": "3 Jane Hair draw"
+		"Comment": "4 Jane Hair draw"
 	},
 	{
 		"From": "9268a5af",
 		"To": "3275b812",
-		"Comment": "4 Jane Hair ib"
+		"Comment": "5 Jane Hair ib"
 	},
 	{
 		"From": "8721477f",
 		"To": "e42171df",
-		"Comment": "4 Jane Hair blend"
+		"Comment": "5 Jane Hair blend"
 	},
 	{
 		"From": "e7a3b7dc",
 		"To": "33a09cfe",
-		"Comment": "4 Jane Hair position"
+		"Comment": "5 Jane Hair position"
 	},
 	{
 		"From": "acec29f8",
 		"To": "fa617c9a",
-		"Comment": "4 Jane Hair texcoord"
+		"Comment": "5 Jane Hair texcoord"
 	},
 	{
 		"From": "2d06e785",
 		"To": "74bc0b7f",
-		"Comment": "4 Jane Hair draw"
+		"Comment": "5 Jane Hair draw"
+	},
+	{
+		"From": "[0,33780]",
+		"To": "[0,16986]",
+		"Comment": "5 Jane Hair object_indexes"
 	},
 	{
 		"From": "e3021a32",
@@ -410,6 +515,11 @@
 		"Comment": "2 Lucy Hair texcoord"
 	},
 	{
+		"From": "[0]",
+		"To": "[0,5253]",
+		"Comment": "2 Lucy Hair object_indexes"
+	},
+	{
 		"From": "25196b7a",
 		"To": "6749b6e7",
 		"Comment": "1 Lycaon Body ib"
@@ -445,6 +555,11 @@
 		"Comment": "3 Lycaon Face ib"
 	},
 	{
+		"From": "f2f19cb2",
+		"To": "5121459b",
+		"Comment": "1 MiyabiBlossom Legs blend"
+	},
+	{
 		"From": "2c317dda",
 		"To": "eaad1408",
 		"Comment": "1 Nekomata Body position"
@@ -458,6 +573,81 @@
 		"From": "d73bc96f",
 		"To": "d27d0e6b",
 		"Comment": "2 Nekomata Body blend"
+	},
+	{
+		"From": "5a4c1ef3",
+		"To": "e53364dd",
+		"Comment": "1 Nicole Body ib"
+	},
+	{
+		"From": "7ecda89f",
+		"To": "b793c804",
+		"Comment": "1 Nicole Body blend"
+	},
+	{
+		"From": "89df5a07",
+		"To": "4af0a4cd",
+		"Comment": "1 Nicole Body position"
+	},
+	{
+		"From": "91c1b779",
+		"To": "ed4c47a9",
+		"Comment": "1 Nicole Body texcoord"
+	},
+	{
+		"From": "8cc1262b",
+		"To": "b19da99e",
+		"Comment": "1 Nicole Body draw"
+	},
+	{
+		"From": "6847bbbd",
+		"To": "7dcfe907",
+		"Comment": "2 Nicole Hair ib"
+	},
+	{
+		"From": "347e4a48",
+		"To": "8171f5c9",
+		"Comment": "2 Nicole Hair blend"
+	},
+	{
+		"From": "199853eb",
+		"To": "6f931ca7",
+		"Comment": "2 Nicole Hair position"
+	},
+	{
+		"From": "06e4fd79",
+		"To": "e04f4893",
+		"Comment": "2 Nicole Hair texcoord"
+	},
+	{
+		"From": "f6344432",
+		"To": "d9b8d61a",
+		"Comment": "2 Nicole Hair draw"
+	},
+	{
+		"From": "077c3500",
+		"To": "f9f810ed",
+		"Comment": "3 Nicole Amillion texcoord"
+	},
+	{
+		"From": "7435fc0e",
+		"To": "93b02078",
+		"Comment": "4 Nicole Face ib"
+	},
+	{
+		"From": "5714e5e6",
+		"To": "",
+		"Comment": "4 Nicole Face texcoord"
+	},
+	{
+		"From": "077c3500",
+		"To": "f9f810ed",
+		"Comment": "1 NicoleCutie Amillion texcoord"
+	},
+	{
+		"From": "7435fc0e",
+		"To": "93b02078",
+		"Comment": "2 NicoleCutie Face ib"
 	},
 	{
 		"From": "b2f3e6aa",
@@ -493,6 +683,191 @@
 		"From": "8b6b17f8",
 		"To": "1c6d41af",
 		"Comment": "5 Piper Hair texcoord"
+	},
+	{
+		"From": "68f34958",
+		"To": "93f1f568",
+		"Comment": "1 Promeia Coat ib"
+	},
+	{
+		"From": "870f56b5",
+		"To": "58f42be3",
+		"Comment": "1 Promeia Coat blend"
+	},
+	{
+		"From": "d43597aa",
+		"To": "1d63183b",
+		"Comment": "1 Promeia Coat position"
+	},
+	{
+		"From": "9f083955",
+		"To": "826446a7",
+		"Comment": "1 Promeia Coat texcoord"
+	},
+	{
+		"From": "93f1f568",
+		"To": "0ae14c24",
+		"Comment": "2 Promeia Coat ib"
+	},
+	{
+		"From": "58f42be3",
+		"To": "4b0d6867",
+		"Comment": "2 Promeia Coat blend"
+	},
+	{
+		"From": "1d63183b",
+		"To": "f6cc27b6",
+		"Comment": "2 Promeia Coat position"
+	},
+	{
+		"From": "826446a7",
+		"To": "bf00cc95",
+		"Comment": "2 Promeia Coat texcoord"
+	},
+	{
+		"From": "cb9d17fc",
+		"To": "e032287a",
+		"Comment": "3 Promeia Eyebrows ib"
+	},
+	{
+		"From": "5ea47a32",
+		"To": "ef3c4506",
+		"Comment": "4 Promeia Face ib"
+	},
+	{
+		"From": "5ff41c34",
+		"To": "bf5b785d",
+		"Comment": "4 Promeia Face blend"
+	},
+	{
+		"From": "6cca89ab",
+		"To": "31178971",
+		"Comment": "5 Promeia Hair ib"
+	},
+	{
+		"From": "5a263750",
+		"To": "3d4a4881",
+		"Comment": "5 Promeia Hair blend"
+	},
+	{
+		"From": "35096cb6",
+		"To": "681aceaa",
+		"Comment": "5 Promeia Hair position"
+	},
+	{
+		"From": "9c0aad96",
+		"To": "84d40d91",
+		"Comment": "5 Promeia Hair texcoord"
+	},
+	{
+		"From": "21871660",
+		"To": "fd054d1d",
+		"Comment": "6 Promeia Legs ib"
+	},
+	{
+		"From": "fd3c3d9f",
+		"To": "9839b071",
+		"Comment": "6 Promeia Legs blend"
+	},
+	{
+		"From": "595bd76e",
+		"To": "0b822797",
+		"Comment": "6 Promeia Legs position"
+	},
+	{
+		"From": "2918714e",
+		"To": "f5fd0e92",
+		"Comment": "6 Promeia Legs texcoord"
+	},
+	{
+		"From": "fd054d1d",
+		"To": "ec003379",
+		"Comment": "7 Promeia Legs ib"
+	},
+	{
+		"From": "9839b071",
+		"To": "65bba179",
+		"Comment": "7 Promeia Legs blend"
+	},
+	{
+		"From": "0b822797",
+		"To": "4c1d0a70",
+		"Comment": "7 Promeia Legs position"
+	},
+	{
+		"From": "f5fd0e92",
+		"To": "03d6f933",
+		"Comment": "7 Promeia Legs texcoord"
+	},
+	{
+		"From": "a633d5b7",
+		"To": "36e794ea",
+		"Comment": "8 Promeia Torso ib"
+	},
+	{
+		"From": "61c399b6",
+		"To": "dae4abd0",
+		"Comment": "8 Promeia Torso blend"
+	},
+	{
+		"From": "a7769c93",
+		"To": "ffaa183a",
+		"Comment": "8 Promeia Torso position"
+	},
+	{
+		"From": "bfcfb2f7",
+		"To": "2a9842a1",
+		"Comment": "8 Promeia Torso texcoord"
+	},
+	{
+		"From": "dd86f5ae",
+		"To": "19ad87f6",
+		"Comment": "8 Promeia Torso draw"
+	},
+	{
+		"From": "36e794ea",
+		"To": "b386901d",
+		"Comment": "9 Promeia Torso ib"
+	},
+	{
+		"From": "dae4abd0",
+		"To": "112582ea",
+		"Comment": "9 Promeia Torso blend"
+	},
+	{
+		"From": "ffaa183a",
+		"To": "68e2baef",
+		"Comment": "9 Promeia Torso position"
+	},
+	{
+		"From": "2a9842a1",
+		"To": "6fe5f8c1",
+		"Comment": "9 Promeia Torso texcoord"
+	},
+	{
+		"From": "19ad87f6",
+		"To": "dd86f5ae",
+		"Comment": "9 Promeia Torso draw"
+	},
+	{
+		"From": "62a6b4bd",
+		"To": "10c77d62",
+		"Comment": "10 Promeia NoCoatTorso ib"
+	},
+	{
+		"From": "575d8b1b",
+		"To": "ee35cc06",
+		"Comment": "10 Promeia NoCoatTorso blend"
+	},
+	{
+		"From": "bf938187",
+		"To": "2dbfe8c9",
+		"Comment": "10 Promeia NoCoatTorso position"
+	},
+	{
+		"From": "d99d21e0",
+		"To": "1fc95f5b",
+		"Comment": "10 Promeia NoCoatTorso texcoord"
 	},
 	{
 		"From": "d915de65",
@@ -545,14 +920,164 @@
 		"Comment": "2 Qingyi Hair draw"
 	},
 	{
+		"From": "[0]",
+		"To": "[0,24648]",
+		"Comment": "2 Qingyi Hair object_indexes"
+	},
+	{
 		"From": "0643440c",
 		"To": "53a2b66e",
 		"Comment": "3 Qingyi Hair texcoord"
 	},
 	{
+		"From": "a23aa8a3",
+		"To": "38daef11",
+		"Comment": "1 Sigrid Body ib"
+	},
+	{
+		"From": "8c0622d7",
+		"To": "018ea72c",
+		"Comment": "1 Sigrid Body blend"
+	},
+	{
+		"From": "08c15b45",
+		"To": "e2a28287",
+		"Comment": "1 Sigrid Body position"
+	},
+	{
+		"From": "f6474154",
+		"To": "08ddaed3",
+		"Comment": "1 Sigrid Body texcoord"
+	},
+	{
+		"From": "01b35c45",
+		"To": "d0bf0e87",
+		"Comment": "1 Sigrid Body draw"
+	},
+	{
+		"From": "[0,42759]",
+		"To": "[0,42963]",
+		"Comment": "1 Sigrid Body object_indexes"
+	},
+	{
+		"From": "[42759,288]",
+		"To": "[42963,288]",
+		"Comment": "1 Sigrid Body object_index_counts"
+	},
+	{
 		"From": "f2f539b8",
 		"To": "e30ca87f",
 		"Comment": "1 Soldier0 Face ib"
+	},
+	{
+		"From": "[0,690,8442]",
+		"To": "[0,984,8442]",
+		"Comment": "1 Soldier0 Face object_indexes"
+	},
+	{
+		"From": "c77b3235",
+		"To": "25cf6bf7",
+		"Comment": "1 SunnaMaid Body position"
+	},
+	{
+		"From": "0c6b95ca",
+		"To": "7a31eb8b",
+		"Comment": "1 SunnaMaid Body texcoord"
+	},
+	{
+		"From": "a5182b8a",
+		"To": "",
+		"Comment": "3 SunnaMaid Eyebrows position"
+	},
+	{
+		"From": "e3cc1981",
+		"To": "",
+		"Comment": "3 SunnaMaid Eyebrows texcoord"
+	},
+	{
+		"From": "9f0ab8cd",
+		"To": "",
+		"Comment": "3 SunnaMaid Eyebrows draw"
+	},
+	{
+		"From": "ac6b5110",
+		"To": "",
+		"Comment": "5 SunnaMaid Face position"
+	},
+	{
+		"From": "506dc9e1",
+		"To": "",
+		"Comment": "5 SunnaMaid Face texcoord"
+	},
+	{
+		"From": "9679c257",
+		"To": "",
+		"Comment": "5 SunnaMaid Face draw"
+	},
+	{
+		"From": "6cc4d486",
+		"To": "a6d82ba5",
+		"Comment": "6 SunnaMaid Hair ib"
+	},
+	{
+		"From": "79de92c7",
+		"To": "4a795f2a",
+		"Comment": "6 SunnaMaid Hair blend"
+	},
+	{
+		"From": "327644ee",
+		"To": "4b93d8eb",
+		"Comment": "6 SunnaMaid Hair position"
+	},
+	{
+		"From": "5e70dde6",
+		"To": "b9030f86",
+		"Comment": "6 SunnaMaid Hair texcoord"
+	},
+	{
+		"From": "22c82346",
+		"To": "74cc56df",
+		"Comment": "6 SunnaMaid Hair draw"
+	},
+	{
+		"From": "6cfb2498",
+		"To": "2414f4b9",
+		"Comment": "1 Velina Face ib"
+	},
+	{
+		"From": "98ecf569",
+		"To": "76fe8eed",
+		"Comment": "1 Velina Face blend"
+	},
+	{
+		"From": "[0,7182,9888]",
+		"To": "[0,7398,9888]",
+		"Comment": "1 Velina Face object_indexes"
+	},
+	{
+		"From": "[7182,2706,1182]",
+		"To": "[7398,2490,1182]",
+		"Comment": "1 Velina Face object_index_counts"
+	},
+	{
+		"From": "6cfb2498",
+		"To": "2414f4b9",
+		"Comment": "1 VelinaLeisure Face ib"
+	},
+	{
+		"From": "98ecf569",
+		"To": "76fe8eed",
+		"Comment": "1 VelinaLeisure Face blend"
+	},
+	{
+		"From": "[0,7182,9888]",
+		"To": "[0,7398,9888]",
+		"Comment": "1 VelinaLeisure Face object_indexes"
+	},
+	{
+		"From": "[7182,2706,1182]",
+		"To": "[7398,2490,1182]",
+		"Comment": "1 VelinaLeisure Face object_index_counts"
 	},
 	{
 		"From": "cb22cb95",
@@ -562,52 +1087,77 @@
 	{
 		"From": "054ea752",
 		"To": "8d6acf4e",
-		"Comment": "2 Wise Body ib"
+		"Comment": "3 Wise Body ib"
 	},
 	{
 		"From": "1d55bd87",
 		"To": "46462bd8",
-		"Comment": "2 Wise Body blend"
+		"Comment": "3 Wise Body blend"
 	},
 	{
 		"From": "9581de22",
 		"To": "67f21c9f",
-		"Comment": "2 Wise Body position"
+		"Comment": "3 Wise Body position"
 	},
 	{
 		"From": "a012c752",
 		"To": "91fbd2fa",
-		"Comment": "2 Wise Body texcoord"
+		"Comment": "3 Wise Body texcoord"
 	},
 	{
 		"From": "73c48816",
 		"To": "b581dc0a",
-		"Comment": "2 Wise Body draw"
+		"Comment": "3 Wise Body draw"
+	},
+	{
+		"From": "46462bd8",
+		"To": "03dadd2a",
+		"Comment": "4 Wise Body blend"
 	},
 	{
 		"From": "f6cac296",
 		"To": "d5ca0411",
-		"Comment": "3 Wise Hair ib"
+		"Comment": "5 Wise Hair ib"
 	},
 	{
 		"From": "1273c7b0",
 		"To": "edfd1666",
-		"Comment": "3 Wise Hair blend"
+		"Comment": "5 Wise Hair blend"
 	},
 	{
 		"From": "6235fa7f",
 		"To": "e8df7ff3",
-		"Comment": "3 Wise Hair position"
+		"Comment": "5 Wise Hair position"
 	},
 	{
 		"From": "fe89498c",
 		"To": "774071dd",
-		"Comment": "3 Wise Hair texcoord"
+		"Comment": "5 Wise Hair texcoord"
 	},
 	{
 		"From": "ba59bf09",
 		"To": "ef9c0510",
-		"Comment": "3 Wise Hair draw"
+		"Comment": "5 Wise Hair draw"
+	},
+	{
+		"From": "edfd1666",
+		"To": "68e4f572",
+		"Comment": "6 Wise Hair blend"
+	},
+	{
+		"From": "8612559a",
+		"To": "f28a6363",
+		"Comment": "1 WiseCrane Body blend"
+	},
+	{
+		"From": "edfd1666",
+		"To": "68e4f572",
+		"Comment": "3 WiseCrane Hair blend"
+	},
+	{
+		"From": "458bbde3",
+		"To": "e0b1e734",
+		"Comment": "4 WiseCrane Neck blend"
 	},
 	{
 		"From": "fd363c76",
@@ -617,7 +1167,7 @@
 	{
 		"From": "2e92fc77",
 		"To": "44d9123b",
-		"Comment": "2 Yanagi Glasses ib"
+		"Comment": "3 Yanagi Glasses ib"
 	},
 	{
 		"From": "0219df6e",

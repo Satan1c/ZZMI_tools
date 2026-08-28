@@ -1,0 +1,8 @@
+<Solution>
+	<Project Path="FixerHub/FixerHub.csproj"/>
+	<Project Path="LoDsGenerator/LoDsGenerator.csproj"/>
+	<Project Path="Shaders/Shaders.csproj"/>
+	<Project Path="SlotFix applier/SlotFix applier.csproj"/>
+	<Project Path="VersionFixerGenerator/VersionFixerGenerator.csproj"/>
+	<Project Path="VgRemapper/VgRemapper.csproj"/>
+</Solution>

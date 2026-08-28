@@ -15,18 +15,16 @@ public static class Generator
 
 	public static void Run((DateTimeOffset date, string name, string data)[] hashes)
 	{
-		var parsed = hashes
-			.AsParallel()
-			.OrderBy(x => x.name).ThenBy(x => x.date)
-			.Select(x => (x.date, x.name,
-				JsonSerializer.Deserialize(x.data, DumpContext.Default.ComponentArray)!));
+		var parsed = hashes.AsParallel()
+			.OrderBy(x => x.name)
+			.ThenBy(x => x.date)
+			.Select(x => (x.date, x.name, JsonSerializer.Deserialize(x.data, DumpContext.Default.ComponentArray)!));
 		var dict = new Dictionary<string, List<Component[]>>();
 		foreach (var (_, name, components) in parsed)
 		{
 			ref var value = ref CollectionsMarshal.GetValueRefOrAddDefault(dict, name, out var exists);
 
-			if (!exists)
-				value = [];
+			if (!exists) value = [];
 
 			value!.Add(components.OrderBy(x => x.ComponentName).ToArray());
 		}
@@ -47,35 +45,24 @@ public static class Generator
 
 			ref var changes = ref CollectionsMarshal.GetValueRefOrAddDefault(changesDict, key, out var exists)!;
 			if (!exists)
-			{
-				changes =
-					dumpComponents[0].Select(x =>
-					{
-						var data = new ChangesData(x);
-						return new KeyValuePair<string, Changes>(x.ComponentName,
-							new Changes
-							{
-								Data = data,
-								History = []
-							}
-						);
-					}).ToDictionary();
-			}
+				changes = dumpComponents[0]
+					.Select(x =>
+						{
+							var data = new ChangesData(x);
+							return new KeyValuePair<string, Changes>(x.ComponentName, new Changes { Data = data, History = [] });
+						}
+					)
+					.ToDictionary();
 
 			for (var i = 1; i < dumpComponents.Count; i++)
 			{
 				var current = dumpComponents[i];
 				foreach (var component in current)
 				{
-					ref var comp =
-						ref CollectionsMarshal.GetValueRefOrAddDefault(changes, component.ComponentName, out exists)!;
+					ref var comp = ref CollectionsMarshal.GetValueRefOrAddDefault(changes, component.ComponentName, out exists)!;
 					if (!exists)
 					{
-						comp = new Changes
-						{
-							Data = new ChangesData(component),
-							History = []
-						};
+						comp = new Changes { Data = new ChangesData(component), History = [] };
 
 						continue;
 					}
@@ -110,6 +97,20 @@ public static class Generator
 					{
 						from.Ib = og.Ib;
 						to.Ib = component.Ib;
+					}
+
+					var newObjectIndexes = ChangesData.EncodeArray(component.ObjectIndexes);
+					if (og.ObjectIndexes != newObjectIndexes)
+					{
+						from.ObjectIndexes = og.ObjectIndexes;
+						to.ObjectIndexes = newObjectIndexes;
+					}
+
+					var newObjectIndexCounts = ChangesData.EncodeArray(component.ObjectIndexCounts);
+					if (og.ObjectIndexCounts != newObjectIndexCounts)
+					{
+						from.ObjectIndexCounts = og.ObjectIndexCounts;
+						to.ObjectIndexCounts = newObjectIndexCounts;
 					}
 
 					if (!from.Equals(to))
@@ -147,7 +148,7 @@ public static class Generator
 			}
 		}
 
-		var finalList = new List<HashChangeData>(1*1024*1024);
+		var finalList = new List<HashChangeData>(1 * 1024 * 1024);
 
 		var counter = 0;
 		var prevChar = string.Empty;
@@ -159,73 +160,88 @@ public static class Generator
 				prevChar = character;
 				charName = character.Split('/')[^1].AsSpan();
 			}
+
 			counter = 1;
 			foreach (var (component, history) in changes)
 			{
-				var sb = new StringBuilder(64)
-					.Append(' ')
-					.Append(charName)
-					.Append(' ')
-					.Append(component);
+				var sb = new StringBuilder(64).Append(' ').Append(charName).Append(' ').Append(component);
 
 				foreach (var (from, to) in history.History)
 				{
 					if (!string.IsNullOrEmpty(from.Ib))
-					{
-						finalList.Add(new HashChangeData
-						{
-							From = from.Ib,
-							To = to.Ib,
-							Comment = new StringBuilder(128).Append(counter).Append(sb).Append(" ib").ToString()
-						});
-					}
-					
+						finalList.Add(
+							new HashChangeData
+							{
+								From = from.Ib, To = to.Ib, Comment = new StringBuilder(128).Append(counter).Append(sb).Append(" ib").ToString()
+							}
+						);
+
 					if (!string.IsNullOrEmpty(from.Blend))
-					{
-						finalList.Add(new HashChangeData
-						{
-							From = from.Blend,
-							To = to.Blend,
-							Comment = new StringBuilder(128).Append(counter).Append(sb).Append(" blend").ToString()
-						});
-					}
-					
+						finalList.Add(
+							new HashChangeData
+							{
+								From = from.Blend,
+								To = to.Blend,
+								Comment = new StringBuilder(128).Append(counter).Append(sb).Append(" blend").ToString()
+							}
+						);
+
 					if (!string.IsNullOrEmpty(from.Position))
-					{
-						finalList.Add(new HashChangeData
-						{
-							From = from.Position,
-							To = to.Position,
-							Comment = new StringBuilder(128).Append(counter).Append(sb).Append(" position").ToString()
-						});
-					}
-					
+						finalList.Add(
+							new HashChangeData
+							{
+								From = from.Position,
+								To = to.Position,
+								Comment = new StringBuilder(128).Append(counter).Append(sb).Append(" position").ToString()
+							}
+						);
+
 					if (!string.IsNullOrEmpty(from.Texcoord))
-					{
-						finalList.Add(new HashChangeData
-						{
-							From = from.Texcoord,
-							To = to.Texcoord,
-							Comment = new StringBuilder(128).Append(counter).Append(sb).Append(" texcoord").ToString()
-						});
-					}
-					
+						finalList.Add(
+							new HashChangeData
+							{
+								From = from.Texcoord,
+								To = to.Texcoord,
+								Comment = new StringBuilder(128).Append(counter).Append(sb).Append(" texcoord").ToString()
+							}
+						);
+
 					if (!string.IsNullOrEmpty(from.Draw))
-					{
-						finalList.Add(new HashChangeData
-						{
-							From = from.Draw,
-							To = to.Draw,
-							Comment = new StringBuilder(128).Append(counter).Append(sb).Append(" draw").ToString()
-						});
-					}
+						finalList.Add(
+							new HashChangeData
+							{
+								From = from.Draw,
+								To = to.Draw,
+								Comment = new StringBuilder(128).Append(counter).Append(sb).Append(" draw").ToString()
+							}
+						);
+
+					if (!string.IsNullOrEmpty(from.ObjectIndexes) && !string.IsNullOrEmpty(to.ObjectIndexes))
+						finalList.Add(
+							new HashChangeData
+							{
+								From = from.ObjectIndexes,
+								To = to.ObjectIndexes,
+								Comment = new StringBuilder(128).Append(counter).Append(sb).Append(" object_indexes").ToString()
+							}
+						);
+
+					if (!string.IsNullOrEmpty(from.ObjectIndexCounts) && !string.IsNullOrEmpty(to.ObjectIndexCounts))
+						finalList.Add(
+							new HashChangeData
+							{
+								From = from.ObjectIndexCounts,
+								To = to.ObjectIndexCounts,
+								Comment = new StringBuilder(128).Append(counter).Append(sb).Append(" object_index_counts").ToString()
+							}
+						);
 					counter++;
 				}
 			}
 		}
-		
+
 		changesDict.Clear();
-		
+
 		var str = JsonSerializer.Serialize(finalList, FixerDataCotext.Default.ListHashChangeData)!;
 		//str = str.Replace(@"""Item1"": {", @"""From"": {").Replace(@"""Item2"": {", @"""To"": {");
 		File.WriteAllText(SaveTo, str, Encoding.UTF8);
@@ -240,14 +256,14 @@ internal sealed class Component
 	[JsonPropertyName("blend_vb")] public string Blend { get; set; } = null!;
 	[JsonPropertyName("texcoord_vb")] public string Texcoord { get; set; } = null!;
 	[JsonPropertyName("ib")] public string Ib { get; set; } = null!;
+	[JsonPropertyName("object_indexes")] public uint[]? ObjectIndexes { get; set; }
+	[JsonPropertyName("object_index_counts")] public uint[]? ObjectIndexCounts { get; set; }
 }
 
 #if DEBUG
 internal class ChangesListDebugView(ChangesList inner)
 {
-	[DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
-	public ChangeView[] Items =>
-		inner.Select(c => new ChangeView(c.from, c.to)).ToArray();
+	[DebuggerBrowsable(DebuggerBrowsableState.RootHidden)] public ChangeView[] Items => inner.Select(c => new ChangeView(c.from, c.to)).ToArray();
 }
 
 [DebuggerDisplay("{Description,nq}")]
@@ -262,50 +278,67 @@ internal class ChangeView(ChangesData from, ChangesData to)
 		{
 			var count = 0;
 			var sb = new StringBuilder(33);
-			
+
 			if (From.Ib != To.Ib)
 			{
 				sb.AppendFormat("ib: {0} -> {1}, ", From.Ib, To.Ib);
 				count++;
 			}
+
 			if (From.Blend != To.Blend)
 			{
 				sb.AppendFormat("blend: {0} -> {1}, ", From.Blend, To.Blend);
 				count++;
 			}
+
 			if (From.Position != To.Position)
 			{
 				sb.AppendFormat("position: {0} -> {1}, ", From.Position, To.Position);
 				count++;
 			}
+
 			if (From.Texcoord != To.Texcoord)
 			{
 				sb.AppendFormat("texcoord: {0} -> {1}, ", From.Texcoord, To.Texcoord);
 				count++;
 			}
+
 			if (From.Draw != To.Draw)
 			{
 				sb.AppendFormat("draw: {0} -> {1}, ", From.Draw, To.Draw);
 				count++;
 			}
-			
-			return count == 5 ? "all" : (count > 3 ? "most" : sb.ToString());
+
+			if (From.ObjectIndexes != To.ObjectIndexes)
+			{
+				sb.AppendFormat("object_indexes: {0} -> {1}, ", From.ObjectIndexes, To.ObjectIndexes);
+				count++;
+			}
+
+			if (From.ObjectIndexCounts != To.ObjectIndexCounts)
+			{
+				sb.AppendFormat("object_index_counts: {0} -> {1}, ", From.ObjectIndexCounts, To.ObjectIndexCounts);
+				count++;
+			}
+
+			return count == 7 ? "all" : (count > 4 ? "most" : sb.ToString());
 		}
 	}
 }
 
 [DebuggerTypeProxy(typeof(ChangesListDebugView))]
-internal class ChangesList : List<(ChangesData from, ChangesData to)> { }
+internal class ChangesList : List<(ChangesData from, ChangesData to)>
+{
+}
 
 [DebuggerDisplay("{DebuggerDisplay,nq}")]
 #endif
 internal sealed class Changes
 {
-	[JsonIgnore]
-	public ChangesData Data { get; set; } = null!;
-	
-	
-#if  DEBUG
+	[JsonIgnore] public ChangesData Data { get; set; } = null!;
+
+
+#if DEBUG
 	public ChangesList History { get; set; } = null!;
 	private string DebuggerDisplay => $"{History.Count}";
 #else
@@ -315,13 +348,8 @@ internal sealed class Changes
 
 internal sealed class ChangesData
 {
-	public string Draw { get; set; } = null;
-	public string Position { get; set; } = null;
-	public string Blend { get; set; } = null;
-	public string Texcoord { get; set; } = null;
-	public string Ib { get; set; } = null;
+	public ChangesData() { }
 
-	public ChangesData(){}
 	public ChangesData(Component component)
 	{
 		Draw = component.Draw;
@@ -329,27 +357,54 @@ internal sealed class ChangesData
 		Blend = component.Blend;
 		Texcoord = component.Texcoord;
 		Ib = component.Ib;
+		ObjectIndexes = EncodeArray(component.ObjectIndexes);
+		ObjectIndexCounts = EncodeArray(component.ObjectIndexCounts);
+	}
+
+	public string Draw { get; set; }
+	public string Position { get; set; }
+	public string Blend { get; set; }
+	public string Texcoord { get; set; }
+	public string Ib { get; set; }
+	public string ObjectIndexes { get; set; }
+	public string ObjectIndexCounts { get; set; }
+
+	internal static string? EncodeArray(uint[]? values)
+	{
+		if (values is null || values.Length == 0)
+			return null;
+		var sb = new StringBuilder(values.Length * 6).Append('[');
+		for (var i = 0; i < values.Length; i++)
+		{
+			if (i > 0) sb.Append(',');
+			sb.Append(values[i]);
+		}
+		return sb.Append(']').ToString();
 	}
 
 	public bool Equals(ChangesData other)
 	{
 		if (ReferenceEquals(this, other)) return true;
-		
+
 		if (Draw != other.Draw) return false;
 		if (Position != other.Position) return false;
 		if (Blend != other.Blend) return false;
 		if (Texcoord != other.Texcoord) return false;
 		if (Ib != other.Ib) return false;
-		
+		if (ObjectIndexes != other.ObjectIndexes) return false;
+		if (ObjectIndexCounts != other.ObjectIndexCounts) return false;
+
 		return true;
 	}
 }
 
 [JsonSerializable(typeof(Component))]
 [JsonSerializable(typeof(Component[]))]
+[JsonSerializable(typeof(uint[]))]
 [JsonSerializable(typeof(Changes))]
 [JsonSerializable(typeof(ChangesData))]
 [JsonSerializable(typeof(ChangesData[]))]
 [JsonSerializable(typeof(Dictionary<string, Dictionary<string, Changes>>))]
-[JsonSourceGenerationOptions(WriteIndented = true, IndentCharacter = '\t', IndentSize = 1, IncludeFields = true, DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull)]
+[JsonSourceGenerationOptions(WriteIndented = true, IndentCharacter = '\t', IndentSize = 1, IncludeFields = true, DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+)]
 internal partial class DumpContext : JsonSerializerContext;
