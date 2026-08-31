@@ -9,10 +9,36 @@ permissions:
   contents: write
 
 jobs:
-  build-windows:
-    runs-on: windows-latest
+  build:
+    name: Build ${{ matrix.name }}
+    runs-on: ${{ matrix.runner }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Windows x64
+            runner: windows-latest
+            rid: win-x64
+            asset: VersionFixer-win-x64.exe
+
+          - name: Linux x64
+            runner: ubuntu-latest
+            rid: linux-x64
+            asset: VersionFixer-linux-x64
+
+          - name: macOS Intel
+            runner: macos-15-intel
+            rid: osx-x64
+            asset: VersionFixer-macos-x64.zip
+
+          - name: macOS Apple Silicon
+            runner: macos-latest
+            rid: osx-arm64
+            asset: VersionFixer-macos-arm64.zip
+
     steps:
-      - name: Checkout code
+      - name: Checkout
         uses: actions/checkout@v7
 
       - name: Setup .NET
@@ -20,167 +46,147 @@ jobs:
         with:
           dotnet-version: '10.0.x'
 
-      - name: Build with Native AOT
+      - name: Publish Native AOT
+        shell: bash
         run: |
-          dotnet publish VersionFixerGenerator/VersionFixerGenerator.csproj `
-            -c Release `
-            -r win-x64 `
-            --self-contained true `
-            -o ./build/win-x64
+          set -euo pipefail
+          rm -rf build
+          mkdir -p build/publish
+          dotnet publish VersionFixerGenerator/VersionFixerGenerator.csproj --configuration Release --runtime "${{ matrix.rid }}" --self-contained true --output build/publish
+          echo "Published files:"
+          find build/publish -maxdepth 2 -type f -print
 
-      - name: Upload to GitHub Release
-        uses: softprops/action-gh-release@v1
-        if: startsWith(github.ref, 'refs/tags/v')
+      - name: Package Windows
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $src = "build/publish/VersionFixerGenerator.exe"
+          $dst = "build/VersionFixer-win-x64.exe"
+          if (-not (Test-Path $src)) { Write-Error "Native AOT executable not found: $src"; exit 1 }
+          Copy-Item $src $dst
+
+      - name: Package Linux
+        if: runner.os == 'Linux'
+        shell: bash
+        run: |
+          set -euo pipefail
+          src="build/publish/VersionFixerGenerator"
+          dst="build/VersionFixer-linux-x64"
+          test -f "$src" || exit 1
+          cp "$src" "$dst"
+          chmod +x "$dst"
+          file "$dst"
+
+      - name: Create macOS app bundle (Intel)
+        if: runner.os == 'macOS' && matrix.rid == 'osx-x64'
+        shell: bash
+        run: |
+          cat > build/VersionFixer.app/Contents/Info.plist << 'PLISTEOF'
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>CFBundleName</key>
+  <string>VersionFixer</string>
+  <key>CFBundleDisplayName</key>
+  <string>VersionFixer</string>
+  <key>CFBundleIdentifier</key>
+  <string>com.satan1c.versionfixer</string>
+  <key>CFBundleExecutable</key>
+  <string>VersionFixer</string>
+  <key>CFBundlePackageType</key>
+  <string>APPL</string>
+  <key>CFBundleVersion</key>
+  <string>1.0</string>
+  <key>CFBundleShortVersionString</key>
+  <string>1.0</string>
+</dict>
+</plist>
+PLISTEOF
+
+      - name: Create macOS app bundle (Apple Silicon)
+        if: runner.os == 'macOS' && matrix.rid == 'osx-arm64'
+        shell: bash
+        run: |
+          cat > build/VersionFixer.app/Contents/Info.plist << 'PLISTEOF'
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>CFBundleName</key>
+  <string>VersionFixer</string>
+  <key>CFBundleDisplayName</key>
+  <string>VersionFixer</string>
+  <key>CFBundleIdentifier</key>
+  <string>com.satan1c.versionfixer</string>
+  <key>CFBundleExecutable</key>
+  <string>VersionFixer</string>
+  <key>CFBundlePackageType</key>
+  <string>APPL</string>
+  <key>CFBundleVersion</key>
+  <string>1.0</string>
+  <key>CFBundleShortVersionString</key>
+  <string>1.0</string>
+</dict>
+</plist>
+PLISTEOF
+
+      - name: Package macOS
+        if: runner.os == 'macOS'
+        shell: bash
+        run: |
+          set -euo pipefail
+          app_root="build/VersionFixer.app"
+          if [[ "${{ matrix.rid }}" == "osx-x64" ]]; then
+            zip_name="build/VersionFixer-macos-x64.zip"
+          else
+            zip_name="build/VersionFixer-macos-arm64.zip"
+          fi
+          ditto -c -k --sequesterRsrc --keepParent "$app_root" "$zip_name"
+
+      - name: Upload build
+        uses: actions/upload-artifact@v4
         with:
-          files: ./build/win-x64/VersionFixer.exe
-          tag_name: ${{ github.ref_name }}
-          name: VersionFixer for Windows (Native AOT)
+          name: ${{ matrix.name }}
+          path: build/${{ matrix.asset }}
+          if-no-files-found: error
+          compression-level: 0
 
-  build-linux:
+  release:
+    name: Publish Release
+    needs: build
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout code
+      - name: Checkout
         uses: actions/checkout@v7
 
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v6
+      - name: Download all builds
+        uses: actions/download-artifact@v4
         with:
-          dotnet-version: '10.0.x'
+          path: release-assets
+          merge-multiple: true
 
-      - name: Install UPX
-        run: sudo apt-get update && sudo apt-get install -y upx
-
-      - name: Build with Native AOT
+      - name: Generate release notes
+        shell: bash
         run: |
-          dotnet publish VersionFixerGenerator/VersionFixerGenerator.csproj \
-            -c Release \
-            -r linux-x64 \
-            --self-contained true \
-            -o ./build/linux-x64
+          bash .github/workflows/generate-release-notes.sh
 
-      - name: Compress with UPX
-        run: upx --best ./build/linux-x64/libVersionFixer.so || echo "UPX failed, using uncompressed binary"
+      - name: Verify release assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "Assets going into release:"
+          find release-assets -maxdepth 1 -type f -printf '%f\n' | sort
+          test -f release-assets/VersionFixer-win-x64.exe || exit 1
+          test -f release-assets/VersionFixer-linux-x64 || exit 1
+          test -f release-assets/VersionFixer-macos-x64.zip || exit 1
+          test -f release-assets/VersionFixer-macos-arm64.zip || exit 1
 
-      - name: Upload to GitHub Release
-        uses: softprops/action-gh-release@v1
-        if: startsWith(github.ref, 'refs/tags/v')
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
         with:
-          files: ./build/linux-x64/libVersionFixer.so
           tag_name: ${{ github.ref_name }}
-          name: VersionFixer for Linux (UPX compressed)
-
-  build-macos-intel:
-    runs-on: macos-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v7
-
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v6
-        with:
-          dotnet-version: '10.0.x'
-
-      - name: Install UPX
-        run: brew install upx
-
-      - name: Build for Intel (x64)
-        run: |
-          mkdir -p build/macos-x64/Contents/MacOS
-          dotnet publish VersionFixerGenerator/VersionFixerGenerator.csproj \
-            -c Release \
-            -r osx-x64 \
-            --self-contained true \
-            -o ./build/macos-x64/Contents/MacOS
-
-      - name: Compress with UPX
-        run: upx --best ./build/macos-x64/Contents/MacOS/VersionFixer || echo "UPX failed, using uncompressed binary"
-
-      - name: Create Info.plist for Intel
-        run: |
-          echo '<?xml version="1.0" encoding="UTF-8"?>' > build/macos-x64/Contents/Info.plist
-          echo '<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">' >> build/macos-x64/Contents/Info.plist
-          echo '<plist version="1.0">' >> build/macos-x64/Contents/Info.plist
-          echo '<dict>' >> build/macos-x64/Contents/Info.plist
-          echo '  <key>CFBundleName</key>' >> build/macos-x64/Contents/Info.plist
-          echo '  <string>VersionFixer Intel</string>' >> build/macos-x64/Contents/Info.plist
-          echo '  <key>LSMinimumSystemVersion</key>' >> build/macos-x64/Contents/Info.plist
-          echo '  <string>10.13</string>' >> build/macos-x64/Contents/Info.plist
-          echo '  <key>NSHighResolutionCapable</key>' >> build/macos-x64/Contents/Info.plist
-          echo '  <true/>' >> build/macos-x64/Contents/Info.plist
-          echo '</dict>' >> build/macos-x64/Contents/Info.plist
-          echo '</plist>' >> build/macos-x64/Contents/Info.plist
-
-      - name: Upload to GitHub Release
-        uses: softprops/action-gh-release@v1
-        if: startsWith(github.ref, 'refs/tags/v')
-        with:
-          files: ./build/macos-x64/VersionFixer.app
-          tag_name: ${{ github.ref_name }}
-          name: VersionFixer for macOS Intel
-
-  build-macos-apple-silicon:
-    runs-on: macos-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v7
-
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v6
-        with:
-          dotnet-version: '10.0.x'
-
-      - name: Install UPX
-        run: brew install upx
-
-      - name: Build for Apple Silicon (arm64)
-        run: |
-          mkdir -p build/macos-arm64/Contents/MacOS
-          dotnet publish VersionFixerGenerator/VersionFixerGenerator.csproj \
-            -c Release \
-            -r osx-arm64 \
-            --self-contained true \
-            -o ./build/macos-arm64/Contents/MacOS
-
-      - name: Compress with UPX
-        run: upx --best ./build/macos-arm64/Contents/MacOS/VersionFixer || echo "UPX failed, using uncompressed binary"
-
-      - name: Create Info.plist for Apple Silicon
-        run: |
-          echo '<?xml version="1.0" encoding="UTF-8"?>' > build/macos-arm64/Contents/Info.plist
-          echo '<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">' >> build/macos-arm64/Contents/Info.plist
-          echo '<plist version="1.0">' >> build/macos-arm64/Contents/Info.plist
-          echo '<dict>' >> build/macos-arm64/Contents/Info.plist
-          echo '  <key>CFBundleName</key>' >> build/macos-arm64/Contents/Info.plist
-          echo '  <string>VersionFixer Apple Silicon</string>' >> build/macos-arm64/Contents/Info.plist
-          echo '  <key>LSMinimumSystemVersion</key>' >> build/macos-arm64/Contents/Info.plist
-          echo '  <string>10.13</string>' >> build/macos-arm64/Contents/Info.plist
-          echo '  <key>NSHighResolutionCapable</key>' >> build/macos-arm64/Contents/Info.plist
-          echo '  <true/>' >> build/macos-arm64/Contents/Info.plist
-          echo '</dict>' >> build/macos-arm64/Contents/Info.plist
-          echo '</plist>' >> build/macos-arm64/Contents/Info.plist
-
-      - name: Upload to GitHub Release
-        uses: softprops/action-gh-release@v1
-        if: startsWith(github.ref, 'refs/tags/v')
-        with:
-          files: ./build/macos-arm64/VersionFixer.app
-          tag_name: ${{ github.ref_name }}
-          name: VersionFixer for macOS Apple Silicon
-
-  generate-release-notes:
-    needs: [build-windows, build-linux, build-macos-intel, build-macos-apple-silicon]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v7
-
-      - name: Generate release notes file
-        run: bash .github/workflows/generate-release-notes.sh
-
-      - name: Upload Release Notes
-        uses: softprops/action-gh-release@v1
-        if: startsWith(github.ref, 'refs/tags/v')
-        with:
-          files: RELEASE_NOTES.md
-          tag_name: ${{ github.ref_name }}
-          name: VersionFixer Release Notes
+          body_path: RELEASE_NOTES.md
+          files: release-assets/*
+          fail_on_unmatched_files: true
