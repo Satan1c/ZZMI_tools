@@ -62,7 +62,7 @@ jobs:
         with:
           files: ./build/linux-x64/libVersionFixer.so
 
-  build-macos:
+  build-macos-intel:
     runs-on: macos-latest
     steps:
       - name: Checkout code
@@ -73,7 +73,7 @@ jobs:
         with:
           dotnet-version: '10.0.x'
 
-      - name: Build with Native AOT
+      - name: Build for Intel (x64)
         run: |
           mkdir -p build/macos-x64/Contents/MacOS
           dotnet publish VersionFixerGenerator/VersionFixerGenerator.csproj `
@@ -82,14 +82,14 @@ jobs:
             --self-contained true `
             -o ./build/macos-x64/Contents/MacOS
 
-      - name: Create Info.plist
+      - name: Create Info.plist for Intel
         run: |
           echo '<?xml version="1.0" encoding="UTF-8"?>' > build/macos-x64/Contents/Info.plist
           echo '<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">' >> build/macos-x64/Contents/Info.plist
           echo '<plist version="1.0">' >> build/macos-x64/Contents/Info.plist
           echo '<dict>' >> build/macos-x64/Contents/Info.plist
           echo '  <key>CFBundleName</key>' >> build/macos-x64/Contents/Info.plist
-          echo '  <string>VersionFixer</string>' >> build/macos-x64/Contents/Info.plist
+          echo '  <string>VersionFixer Intel</string>' >> build/macos-x64/Contents/Info.plist
           echo '  <key>LSMinimumSystemVersion</key>' >> build/macos-x64/Contents/Info.plist
           echo '  <string>10.13</string>' >> build/macos-x64/Contents/Info.plist
           echo '  <key>NSHighResolutionCapable</key>' >> build/macos-x64/Contents/Info.plist
@@ -103,8 +103,49 @@ jobs:
         with:
           files: ./build/macos-x64/VersionFixer.app
 
+  build-macos-apple-silicon:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Build for Apple Silicon (arm64)
+        run: |
+          mkdir -p build/macos-arm64/Contents/MacOS
+          dotnet publish VersionFixerGenerator/VersionFixerGenerator.csproj `
+            -c Release `
+            -r osx-arm64 `
+            --self-contained true `
+            -o ./build/macos-arm64/Contents/MacOS
+
+      - name: Create Info.plist for Apple Silicon
+        run: |
+          echo '<?xml version="1.0" encoding="UTF-8"?>' > build/macos-arm64/Contents/Info.plist
+          echo '<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">' >> build/macos-arm64/Contents/Info.plist
+          echo '<plist version="1.0">' >> build/macos-arm64/Contents/Info.plist
+          echo '<dict>' >> build/macos-arm64/Contents/Info.plist
+          echo '  <key>CFBundleName</key>' >> build/macos-arm64/Contents/Info.plist
+          echo '  <string>VersionFixer Apple Silicon</string>' >> build/macos-arm64/Contents/Info.plist
+          echo '  <key>LSMinimumSystemVersion</key>' >> build/macos-arm64/Contents/Info.plist
+          echo '  <string>10.13</string>' >> build/macos-arm64/Contents/Info.plist
+          echo '  <key>NSHighResolutionCapable</key>' >> build/macos-arm64/Contents/Info.plist
+          echo '  <true/>' >> build/macos-arm64/Contents/Info.plist
+          echo '</dict>' >> build/macos-arm64/Contents/Info.plist
+          echo '</plist>' >> build/macos-arm64/Contents/Info.plist
+
+      - name: Upload to GitHub Release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/v')
+        with:
+          files: ./build/macos-arm64/VersionFixer.app
+
   create-release-notes:
-    needs: [build-windows, build-linux, build-macos]
+    needs: [build-windows, build-linux, build-macos-intel, build-macos-apple-silicon]
     runs-on: ubuntu-latest
     steps:
       - name: Generate release notes from git log
