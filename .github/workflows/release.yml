@@ -4,6 +4,7 @@ on:
   push:
     tags:
       - 'v*'
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -28,21 +29,21 @@ jobs:
             asset: VersionFixer-linux-x64
 
           - name: macOS Intel
-            runner: macos-15-intel
+            runner: macos-13
             rid: osx-x64
             asset: VersionFixer-macos-x64.zip
 
           - name: macOS Apple Silicon
-            runner: macos-latest
+            runner: macos-14
             rid: osx-arm64
             asset: VersionFixer-macos-arm64.zip
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v7
+        uses: actions/checkout@v4
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@v6
+        uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '10.0.x'
 
@@ -50,19 +51,29 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+
           rm -rf build
           mkdir -p build/publish
-          dotnet publish VersionFixerGenerator/VersionFixerGenerator.csproj --configuration Release --runtime "${{ matrix.rid }}" --self-contained true --output build/publish
-          echo "Published files:"
-          find build/publish -maxdepth 2 -type f -print
+
+          dotnet publish VersionFixerGenerator/VersionFixerGenerator.csproj \
+            --configuration Release \
+            --runtime "${{ matrix.rid }}" \
+            --self-contained true \
+            --output build/publish
+
+          find build/publish -maxdepth 1 -type f -print
 
       - name: Package Windows
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
-          $src = "build/publish/VersionFixerGenerator.exe"
-          $dst = "build/VersionFixer-win-x64.exe"
-          if (-not (Test-Path $src)) { Write-Error "Native AOT executable not found: $src"; exit 1 }
+          $src = 'build/publish/VersionFixerGenerator.exe'
+          $dst = 'build/VersionFixer-win-x64.exe'
+
+          if (-not (Test-Path $src)) {
+            throw "Missing $src"
+          }
+
           Copy-Item $src $dst
 
       - name: Package Linux
@@ -70,81 +81,73 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          src="build/publish/VersionFixerGenerator"
-          dst="build/VersionFixer-linux-x64"
-          test -f "$src" || exit 1
+
+          src='build/publish/VersionFixerGenerator'
+          dst='build/VersionFixer-linux-x64'
+
+          test -f "$src"
+
           cp "$src" "$dst"
           chmod +x "$dst"
+
           file "$dst"
-
-      - name: Create macOS app bundle (Intel)
-        if: runner.os == 'macOS' && matrix.rid == 'osx-x64'
-        shell: bash
-        run: |
-          cat > build/VersionFixer.app/Contents/Info.plist << 'PLISTEOF'
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-<dict>
-  <key>CFBundleName</key>
-  <string>VersionFixer</string>
-  <key>CFBundleDisplayName</key>
-  <string>VersionFixer</string>
-  <key>CFBundleIdentifier</key>
-  <string>com.satan1c.versionfixer</string>
-  <key>CFBundleExecutable</key>
-  <string>VersionFixer</string>
-  <key>CFBundlePackageType</key>
-  <string>APPL</string>
-  <key>CFBundleVersion</key>
-  <string>1.0</string>
-  <key>CFBundleShortVersionString</key>
-  <string>1.0</string>
-</dict>
-</plist>
-PLISTEOF
-
-      - name: Create macOS app bundle (Apple Silicon)
-        if: runner.os == 'macOS' && matrix.rid == 'osx-arm64'
-        shell: bash
-        run: |
-          cat > build/VersionFixer.app/Contents/Info.plist << 'PLISTEOF'
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-<dict>
-  <key>CFBundleName</key>
-  <string>VersionFixer</string>
-  <key>CFBundleDisplayName</key>
-  <string>VersionFixer</string>
-  <key>CFBundleIdentifier</key>
-  <string>com.satan1c.versionfixer</string>
-  <key>CFBundleExecutable</key>
-  <string>VersionFixer</string>
-  <key>CFBundlePackageType</key>
-  <string>APPL</string>
-  <key>CFBundleVersion</key>
-  <string>1.0</string>
-  <key>CFBundleShortVersionString</key>
-  <string>1.0</string>
-</dict>
-</plist>
-PLISTEOF
 
       - name: Package macOS
         if: runner.os == 'macOS'
         shell: bash
         run: |
           set -euo pipefail
-          app_root="build/VersionFixer.app"
-          if [[ "${{ matrix.rid }}" == "osx-x64" ]]; then
-            zip_name="build/VersionFixer-macos-x64.zip"
-          else
-            zip_name="build/VersionFixer-macos-arm64.zip"
-          fi
-          ditto -c -k --sequesterRsrc --keepParent "$app_root" "$zip_name"
 
-      - name: Upload build
+          src='build/publish/VersionFixerGenerator'
+          app='build/VersionFixer.app'
+
+          test -f "$src"
+
+          mkdir -p "$app/Contents/MacOS"
+
+          cp "$src" "$app/Contents/MacOS/VersionFixer"
+          chmod +x "$app/Contents/MacOS/VersionFixer"
+
+          cat > "$app/Contents/Info.plist" <<'PLIST'
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>CFBundleName</key>
+  <string>VersionFixer</string>
+
+  <key>CFBundleDisplayName</key>
+  <string>VersionFixer</string>
+
+  <key>CFBundleIdentifier</key>
+  <string>com.satan1c.versionfixer</string>
+
+  <key>CFBundleExecutable</key>
+  <string>VersionFixer</string>
+
+  <key>CFBundlePackageType</key>
+  <string>APPL</string>
+
+  <key>CFBundleVersion</key>
+  <string>1.0</string>
+
+  <key>CFBundleShortVersionString</key>
+  <string>1.0</string>
+</dict>
+</plist>
+PLIST
+
+          if [[ '${{ matrix.rid }}' == 'osx-x64' ]]; then
+            zip='build/VersionFixer-macos-x64.zip'
+          else
+            zip='build/VersionFixer-macos-arm64.zip'
+          fi
+
+          ditto -c -k --sequesterRsrc --keepParent \
+            "$app" \
+            "$zip"
+
+      - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.name }}
@@ -159,9 +162,9 @@ PLISTEOF
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v7
+        uses: actions/checkout@v4
 
-      - name: Download all builds
+      - name: Download build artifacts
         uses: actions/download-artifact@v4
         with:
           path: release-assets
@@ -169,19 +172,19 @@ PLISTEOF
 
       - name: Generate release notes
         shell: bash
-        run: |
-          bash .github/workflows/generate-release-notes.sh
+        run: bash .github/workflows/generate-release-notes.sh
 
-      - name: Verify release assets
+      - name: Verify assets
         shell: bash
         run: |
           set -euo pipefail
-          echo "Assets going into release:"
-          find release-assets -maxdepth 1 -type f -printf '%f\n' | sort
-          test -f release-assets/VersionFixer-win-x64.exe || exit 1
-          test -f release-assets/VersionFixer-linux-x64 || exit 1
-          test -f release-assets/VersionFixer-macos-x64.zip || exit 1
-          test -f release-assets/VersionFixer-macos-arm64.zip || exit 1
+
+          test -f release-assets/VersionFixer-win-x64.exe
+          test -f release-assets/VersionFixer-linux-x64
+          test -f release-assets/VersionFixer-macos-x64.zip
+          test -f release-assets/VersionFixer-macos-arm64.zip
+
+          ls -lh release-assets
 
       - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2
