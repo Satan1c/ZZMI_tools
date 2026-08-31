@@ -169,12 +169,37 @@ public static class Generator
 				foreach (var (from, to) in history.History)
 				{
 					if (!string.IsNullOrEmpty(from.Ib))
-						finalList.Add(
-							new HashChangeData
+					{
+						// Create IB hash entry with embedded index data for cross-field updates
+						var ibEntry = new HashChangeData
+						{
+							From = from.Ib,
+							To = to.Ib,
+							Comment = new StringBuilder(128).Append(counter).Append(sb).Append(" ib").ToString()
+						};
+
+						// Embed object_indexes data only if both From and To have values
+						if (!string.IsNullOrEmpty(from.ObjectIndexes) && !string.IsNullOrEmpty(to.ObjectIndexes))
+						{
+							if (from.ObjectIndexes != to.ObjectIndexes)
 							{
-								From = from.Ib, To = to.Ib, Comment = new StringBuilder(128).Append(counter).Append(sb).Append(" ib").ToString()
+								ibEntry.FromIndexes = from.ObjectIndexes;
+								ibEntry.ToIndexes = to.ObjectIndexes;
 							}
-						);
+						}
+
+						// Embed object_index_counts data only if both From and To have values
+						if (!string.IsNullOrEmpty(from.ObjectIndexCounts) && !string.IsNullOrEmpty(to.ObjectIndexCounts))
+						{
+							if (from.ObjectIndexCounts != to.ObjectIndexCounts)
+							{
+								ibEntry.FromIndexCounts = from.ObjectIndexCounts;
+								ibEntry.ToIndexCounts = to.ObjectIndexCounts;
+							}
+						}
+
+						finalList.Add(ibEntry);
+					}
 
 					if (!string.IsNullOrEmpty(from.Blend))
 						finalList.Add(
@@ -216,25 +241,6 @@ public static class Generator
 							}
 						);
 
-					if (!string.IsNullOrEmpty(from.ObjectIndexes) && !string.IsNullOrEmpty(to.ObjectIndexes))
-						finalList.Add(
-							new HashChangeData
-							{
-								From = from.ObjectIndexes,
-								To = to.ObjectIndexes,
-								Comment = new StringBuilder(128).Append(counter).Append(sb).Append(" object_indexes").ToString()
-							}
-						);
-
-					if (!string.IsNullOrEmpty(from.ObjectIndexCounts) && !string.IsNullOrEmpty(to.ObjectIndexCounts))
-						finalList.Add(
-							new HashChangeData
-							{
-								From = from.ObjectIndexCounts,
-								To = to.ObjectIndexCounts,
-								Comment = new StringBuilder(128).Append(counter).Append(sb).Append(" object_index_counts").ToString()
-							}
-						);
 					counter++;
 				}
 			}

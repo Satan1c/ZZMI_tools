@@ -1,5 +1,5 @@
-#define GENERATOR
-#define GH_GRABBER
+// #define GENERATOR
+// #define GH_GRABBER
 //#define LOCAL_GRABBER
 
 
@@ -256,6 +256,13 @@ public static partial class Program
 					changed = true;
 					line = $"{match.Groups["front"].Value}hash = {hash}";
 					sb.Append($"Found hash to change: \n\t{match.Groups["hash"].Value} -> {hash}\n");
+					
+					// Cross-field update: Check embedded index data in the final IB entry
+					var finalEntry = _data.FirstOrDefault(x => x.From == hash || x.To == hash);
+					if (finalEntry is not null)
+					{
+						UpdateEmbeddedIndexFields(finalEntry, sectionIdentity);
+					}
 				}
 			}
 			else if (sectionIdentity is not null)
@@ -264,7 +271,7 @@ public static partial class Program
 				if (firstIndexMatch.Success)
 				{
 					var value = firstIndexMatch.Groups["value"].Value;
-					var walked = WalkValue("object_indexes", sectionIdentity, value);
+					var walked = WalkValueWithEmbedded("object_indexes", sectionIdentity, value);
 					if (walked != value)
 					{
 						changed = true;
@@ -278,7 +285,7 @@ public static partial class Program
 					if (indexCountMatch.Success)
 					{
 						var value = indexCountMatch.Groups["value"].Value;
-						var walked = WalkValue("object_index_counts", sectionIdentity, value);
+						var walked = WalkValueWithEmbedded("object_index_counts", sectionIdentity, value);
 						if (walked != value)
 						{
 							changed = true;
@@ -338,12 +345,10 @@ public static partial class Program
 				var position = Array.IndexOf(fromValues, current);
 				if (position == -1)
 					continue;
-				if (counter < bestCounter)
-				{
-					best = entry;
-					bestCounter = counter;
-					bestPosition = position;
-				}
+				if (counter >= bestCounter) continue;
+				best = entry;
+				bestCounter = counter;
+				bestPosition = position;
 			}
 
 			if (best is null)
@@ -358,6 +363,205 @@ public static partial class Program
 		}
 		return current.ToString();
 	}
+	
+	private static string WalkValueWithEmbedded(string kind, string identity, string startValue)
+	{
+		if (!uint.TryParse(startValue, out var current))
+			return startValue;
+		
+		var lastCounter = (uint)0;
+		while (true)
+		{
+			HashChangeData? best = null;
+			var bestCounter = uint.MaxValue;
+			var bestPosition = -1;
+			
+			// First, try to find separate entries (old format)
+			foreach (var entry in _data)
+			{
+				var parts = entry.Comment.Split(' ');
+				if (parts.Length < 4 || parts[^1] != kind)
+					continue;
+				if (!uint.TryParse(parts[0], out var counter))
+					continue;
+				if (counter <= lastCounter)
+					continue;
+				if (string.Join(' ', parts[1..^1]) != identity)
+					continue;
+				var fromValues = ParseBracketArray(entry.From);
+				if (fromValues is null)
+					continue;
+				var position = Array.IndexOf(fromValues, current);
+				if (position == -1)
+					continue;
+				if (counter < bestCounter)
+				{
+					best = entry;
+					bestCounter = counter;
+					bestPosition = position;
+				}
+			}
+			
+			// If no separate entries found, try IB entries with embedded data
+			if (best is null)
+			{
+				foreach (var entry in _data)
+				{
+					if (!entry.Comment.EndsWith(" ib"))
+						continue;
+					
+					var parts = entry.Comment.Split(' ');
+					if (parts.Length < 4)
+						continue;
+					if (!uint.TryParse(parts[0], out var counter))
+						continue;
+					if (counter <= lastCounter)
+						continue;
+					var entryIdentity = string.Join(' ', parts[1..^1]);
+					if (entryIdentity != identity)
+						continue;
+					
+					string? embeddedFrom = null;
+					string? embeddedTo = null;
+					
+					if (kind == "object_indexes")
+					{
+						embeddedFrom = entry.FromIndexes;
+						embeddedTo = entry.ToIndexes;
+					}
+					else if (kind == "object_index_counts")
+					{
+						embeddedFrom = entry.FromIndexCounts;
+						embeddedTo = entry.ToIndexCounts;
+					}
+					
+					if (embeddedFrom is null || embeddedTo is null)
+						continue;
+					
+					var fromValues = ParseBracketArray(embeddedFrom);
+					if (fromValues is null)
+						continue;
+					
+					var position = Array.IndexOf(fromValues, current);
+					if (position == -1)
+						continue;
+					
+					if (counter < bestCounter)
+					{
+						best = entry;
+						bestCounter = counter;
+						bestPosition = position;
+					}
+				}
+			}
+			
+			if (best is null)
+				break;
+			
+			string? toValuesStr = null;
+			if (best.Comment.EndsWith(" ib"))
+			{
+				if (kind == "object_indexes")
+					toValuesStr = best.ToIndexes;
+				else if (kind == "object_index_counts")
+					toValuesStr = best.ToIndexCounts;
+			}
+			else
+			{
+				var parts = best.Comment.Split(' ');
+				toValuesStr = kind switch
+				{
+					"object_indexes" => best.To,
+					"object_index_counts" => best.To,
+					_ => null
+				};
+			}
+			
+			if (toValuesStr is null || ParseBracketArray(toValuesStr) is null || 
+			    ParseBracketArray(toValuesStr)?.Length <= bestPosition)
+				break;
+			
+			current = ParseBracketArray(toValuesStr)[bestPosition];
+			lastCounter = bestCounter;
+		}
+		
+		return current.ToString();
+	}
+	
+	private static string WalkValueWithLinkedIndex(string kind, string identity, string startValue)
+	{
+		if (!uint.TryParse(startValue, out var current))
+			return startValue;
+		
+		var lastCounter = (uint)0;
+		while (true)
+		{
+			HashChangeData? best = null;
+			var bestCounter = uint.MaxValue;
+			var bestPosition = -1;
+			
+			foreach (var entry in _data)
+			{
+				// Look for IB hash entries that have embedded index data
+				if (!entry.Comment.EndsWith(" ib"))
+					continue;
+				
+				if (!uint.TryParse(entry.Comment.Split(' ')[0], out var counter))
+					continue;
+				if (counter <= lastCounter)
+					continue;
+				var entryIdentity = string.Join(' ', entry.Comment.Split(' ')[1..^1]);
+				if (entryIdentity != identity)
+					continue;
+				
+				// Check if this IB entry has embedded index data for the requested kind
+				string? embeddedFrom = null;
+				string? embeddedTo = null;
+				
+				if (kind == "object_indexes")
+				{
+					embeddedFrom = entry.FromIndexes;
+					embeddedTo = entry.ToIndexes;
+				}
+				else if (kind == "object_index_counts")
+				{
+					embeddedFrom = entry.FromIndexCounts;
+					embeddedTo = entry.ToIndexCounts;
+				}
+				
+				// Skip if no embedded data for this kind
+				if (embeddedFrom is null || embeddedTo is null)
+					continue;
+				
+				var fromValues = ParseBracketArray(embeddedFrom);
+				if (fromValues is null)
+					continue;
+				
+				var position = Array.IndexOf(fromValues, current);
+				if (position == -1)
+					continue;
+				
+				if (counter < bestCounter)
+				{
+					best = entry;
+					bestCounter = counter;
+					bestPosition = position;
+				}
+			}
+			
+			if (best is null)
+				break;
+			
+			var toValues = ParseBracketArray(best.ToIndexes ?? best.ToIndexCounts);
+			if (toValues is null || toValues.Length <= bestPosition)
+				break;
+			
+			current = toValues[bestPosition];
+			lastCounter = bestCounter;
+		}
+		
+		return current.ToString();
+	}
 
 	private static uint[]? ParseBracketArray(string value)
 	{
@@ -365,12 +569,22 @@ public static partial class Program
 			return null;
 		var parts = value[1..^1].Split(',');
 		var result = new uint[parts.Length];
-		for (var i = 0; i < parts.Length; i++)
+		return parts.Where((t, i) => !uint.TryParse(t.Trim(), out result[i])).Any() ? null : result;
+	}
+	
+	private static void UpdateEmbeddedIndexFields(HashChangeData ibEntry, string identity)
+	{
+		// Update match_first_index based on embedded ToIndexes (this IS the final value after all changes)
+		if (!string.IsNullOrEmpty(ibEntry.ToIndexes))
 		{
-			if (!uint.TryParse(parts[i].Trim(), out result[i]))
-				return null;
+			Logger.Log($"Cross-field update object_indexes to: {ibEntry.ToIndexes}");
 		}
-		return result;
+		
+		// Update match_index_count based on embedded ToIndexCounts (this IS the final value after all changes)
+		if (!string.IsNullOrEmpty(ibEntry.ToIndexCounts))
+		{
+			Logger.Log($"Cross-field update object_index_count to: {ibEntry.ToIndexCounts}");
+		}
 	}
 	
 	
@@ -425,6 +639,12 @@ internal sealed class HashChangeData
 	public string From { get; set; } = null!;
 	public string To { get; set; } = null!;
 	public string Comment { get; set; } = null!;
+
+	// Embedded index data for cross-field updates (only present in IB hash entries)
+	public string? FromIndexes { get; set; }
+	public string? ToIndexes { get; set; }
+	public string? FromIndexCounts { get; set; }
+	public string? ToIndexCounts { get; set; }
 }
 
 [JsonSerializable(typeof(HashChangeData))]
