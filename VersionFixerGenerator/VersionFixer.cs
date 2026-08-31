@@ -1,5 +1,5 @@
-// #define GENERATOR
-// #define GH_GRABBER
+#define GENERATOR
+#define GH_GRABBER
 //#define LOCAL_GRABBER
 
 

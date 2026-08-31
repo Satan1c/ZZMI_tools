@@ -37,7 +37,9 @@
 	{
 		"From": "1817f3ca",
 		"To": "c2b4ce3a",
-		"Comment": "2 Belle Body ib"
+		"Comment": "2 Belle Body ib",
+		"FromIndexes": "[0]",
+		"ToIndexes": "[0,31275]"
 	},
 	{
 		"From": "c92a17d8",
@@ -58,11 +60,6 @@
 		"From": "ac1c8f80",
 		"To": "bea2b94e",
 		"Comment": "2 Belle Body draw"
-	},
-	{
-		"From": "[0]",
-		"To": "[0,31275]",
-		"Comment": "2 Belle Body object_indexes"
 	},
 	{
 		"From": "bea4a483",
@@ -147,7 +144,11 @@
 	{
 		"From": "62ed56cc",
 		"To": "d0627e1f",
-		"Comment": "8 BelleSunlight Neck ib"
+		"Comment": "8 BelleSunlight Neck ib",
+		"FromIndexes": "[0]",
+		"ToIndexes": "[0,960]",
+		"FromIndexCounts": "[960]",
+		"ToIndexCounts": "[960,36]"
 	},
 	{
 		"From": "3bd79a0b",
@@ -168,16 +169,6 @@
 		"From": "4c215c73",
 		"To": "3f594476",
 		"Comment": "8 BelleSunlight Neck draw"
-	},
-	{
-		"From": "[0]",
-		"To": "[0,960]",
-		"Comment": "8 BelleSunlight Neck object_indexes"
-	},
-	{
-		"From": "[960]",
-		"To": "[960,36]",
-		"Comment": "8 BelleSunlight Neck object_index_counts"
 	},
 	{
 		"From": "a2f79d33",
@@ -277,7 +268,9 @@
 	{
 		"From": "0f82a13e",
 		"To": "8b240678",
-		"Comment": "1 Grace Body ib"
+		"Comment": "1 Grace Body ib",
+		"FromIndexes": "[0,42885]",
+		"ToIndexes": "[0,42927]"
 	},
 	{
 		"From": "50837a5c",
@@ -298,11 +291,6 @@
 		"From": "e5e04f6f",
 		"To": "f1cba806",
 		"Comment": "1 Grace Body draw"
-	},
-	{
-		"From": "[0,42885]",
-		"To": "[0,42927]",
-		"Comment": "1 Grace Body object_indexes"
 	},
 	{
 		"From": "89d903ba",
@@ -422,7 +410,9 @@
 	{
 		"From": "9268a5af",
 		"To": "3275b812",
-		"Comment": "5 Jane Hair ib"
+		"Comment": "5 Jane Hair ib",
+		"FromIndexes": "[0,33780]",
+		"ToIndexes": "[0,16986]"
 	},
 	{
 		"From": "8721477f",
@@ -443,11 +433,6 @@
 		"From": "2d06e785",
 		"To": "74bc0b7f",
 		"Comment": "5 Jane Hair draw"
-	},
-	{
-		"From": "[0,33780]",
-		"To": "[0,16986]",
-		"Comment": "5 Jane Hair object_indexes"
 	},
 	{
 		"From": "e3021a32",
@@ -502,7 +487,9 @@
 	{
 		"From": "198e99d7",
 		"To": "69ad9d08",
-		"Comment": "2 Lucy Hair ib"
+		"Comment": "2 Lucy Hair ib",
+		"FromIndexes": "[0]",
+		"ToIndexes": "[0,5253]"
 	},
 	{
 		"From": "5315f036",
@@ -513,11 +500,6 @@
 		"From": "751e21a5",
 		"To": "c8810832",
 		"Comment": "2 Lucy Hair texcoord"
-	},
-	{
-		"From": "[0]",
-		"To": "[0,5253]",
-		"Comment": "2 Lucy Hair object_indexes"
 	},
 	{
 		"From": "25196b7a",
@@ -897,7 +879,9 @@
 	{
 		"From": "33f6d1f2",
 		"To": "3cacba0a",
-		"Comment": "2 Qingyi Hair ib"
+		"Comment": "2 Qingyi Hair ib",
+		"FromIndexes": "[0]",
+		"ToIndexes": "[0,24648]"
 	},
 	{
 		"From": "d196bd5c",
@@ -920,11 +904,6 @@
 		"Comment": "2 Qingyi Hair draw"
 	},
 	{
-		"From": "[0]",
-		"To": "[0,24648]",
-		"Comment": "2 Qingyi Hair object_indexes"
-	},
-	{
 		"From": "0643440c",
 		"To": "53a2b66e",
 		"Comment": "3 Qingyi Hair texcoord"
@@ -932,7 +911,11 @@
 	{
 		"From": "a23aa8a3",
 		"To": "38daef11",
-		"Comment": "1 Sigrid Body ib"
+		"Comment": "1 Sigrid Body ib",
+		"FromIndexes": "[0,42759]",
+		"ToIndexes": "[0,42963]",
+		"FromIndexCounts": "[42759,288]",
+		"ToIndexCounts": "[42963,288]"
 	},
 	{
 		"From": "8c0622d7",
@@ -955,24 +938,11 @@
 		"Comment": "1 Sigrid Body draw"
 	},
 	{
-		"From": "[0,42759]",
-		"To": "[0,42963]",
-		"Comment": "1 Sigrid Body object_indexes"
-	},
-	{
-		"From": "[42759,288]",
-		"To": "[42963,288]",
-		"Comment": "1 Sigrid Body object_index_counts"
-	},
-	{
 		"From": "f2f539b8",
 		"To": "e30ca87f",
-		"Comment": "1 Soldier0 Face ib"
-	},
-	{
-		"From": "[0,690,8442]",
-		"To": "[0,984,8442]",
-		"Comment": "1 Soldier0 Face object_indexes"
+		"Comment": "1 Soldier0 Face ib",
+		"FromIndexes": "[0,690,8442]",
+		"ToIndexes": "[0,984,8442]"
 	},
 	{
 		"From": "c77b3235",
@@ -1042,7 +1012,11 @@
 	{
 		"From": "6cfb2498",
 		"To": "2414f4b9",
-		"Comment": "1 Velina Face ib"
+		"Comment": "1 Velina Face ib",
+		"FromIndexes": "[0,7182,9888]",
+		"ToIndexes": "[0,7398,9888]",
+		"FromIndexCounts": "[7182,2706,1182]",
+		"ToIndexCounts": "[7398,2490,1182]"
 	},
 	{
 		"From": "98ecf569",
@@ -1050,34 +1024,18 @@
 		"Comment": "1 Velina Face blend"
 	},
 	{
-		"From": "[0,7182,9888]",
-		"To": "[0,7398,9888]",
-		"Comment": "1 Velina Face object_indexes"
-	},
-	{
-		"From": "[7182,2706,1182]",
-		"To": "[7398,2490,1182]",
-		"Comment": "1 Velina Face object_index_counts"
-	},
-	{
 		"From": "6cfb2498",
 		"To": "2414f4b9",
-		"Comment": "1 VelinaLeisure Face ib"
+		"Comment": "1 VelinaLeisure Face ib",
+		"FromIndexes": "[0,7182,9888]",
+		"ToIndexes": "[0,7398,9888]",
+		"FromIndexCounts": "[7182,2706,1182]",
+		"ToIndexCounts": "[7398,2490,1182]"
 	},
 	{
 		"From": "98ecf569",
 		"To": "76fe8eed",
 		"Comment": "1 VelinaLeisure Face blend"
-	},
-	{
-		"From": "[0,7182,9888]",
-		"To": "[0,7398,9888]",
-		"Comment": "1 VelinaLeisure Face object_indexes"
-	},
-	{
-		"From": "[7182,2706,1182]",
-		"To": "[7398,2490,1182]",
-		"Comment": "1 VelinaLeisure Face object_index_counts"
 	},
 	{
 		"From": "cb22cb95",
