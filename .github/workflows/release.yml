@@ -3,7 +3,7 @@ name: Release
 on:
   push:
     tags:
-      - 'v*'
+      - "v*"
   workflow_dispatch:
 
 permissions:
@@ -21,22 +21,26 @@ jobs:
           - name: Windows x64
             runner: windows-latest
             rid: win-x64
-            asset: VersionFixer-win-x64.exe
+            source: build/publish/VersionFixerGenerator.exe
+            asset: build/VersionFixer-win-x64.exe
 
           - name: Linux x64
             runner: ubuntu-latest
             rid: linux-x64
-            asset: VersionFixer-linux-x64
+            source: build/publish/VersionFixerGenerator
+            asset: build/VersionFixer-linux-x64
 
           - name: macOS Intel
             runner: macos-13
             rid: osx-x64
-            asset: VersionFixer-macos-x64.zip
+            source: build/publish/VersionFixerGenerator
+            asset: build/VersionFixer-macos-x64
 
           - name: macOS Apple Silicon
             runner: macos-14
             rid: osx-arm64
-            asset: VersionFixer-macos-arm64.zip
+            source: build/publish/VersionFixerGenerator
+            asset: build/VersionFixer-macos-arm64
 
     steps:
       - name: Checkout
@@ -45,7 +49,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '10.0.x'
+          dotnet-version: "10.0.x"
 
       - name: Publish Native AOT
         shell: bash
@@ -61,102 +65,40 @@ jobs:
             --self-contained true \
             --output build/publish
 
+          echo "Published files:"
           find build/publish -maxdepth 1 -type f -print
+
+          test -f "${{ matrix.source }}"
 
       - name: Package Windows
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
-          $src = 'build/publish/VersionFixerGenerator.exe'
-          $dst = 'build/VersionFixer-win-x64.exe'
+          Copy-Item `
+            "${{ matrix.source }}" `
+            "${{ matrix.asset }}"
 
-          if (-not (Test-Path $src)) {
-            throw "Missing $src"
-          }
-
-          Copy-Item $src $dst
-
-      - name: Package Linux
-        if: runner.os == 'Linux'
+      - name: Package Unix
+        if: runner.os != 'Windows'
         shell: bash
         run: |
           set -euo pipefail
 
-          src='build/publish/VersionFixerGenerator'
-          dst='build/VersionFixer-linux-x64'
+          cp "${{ matrix.source }}" "${{ matrix.asset }}"
+          chmod +x "${{ matrix.asset }}"
 
-          test -f "$src"
-
-          cp "$src" "$dst"
-          chmod +x "$dst"
-
-          file "$dst"
-
-      - name: Package macOS
-        if: runner.os == 'macOS'
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          src='build/publish/VersionFixerGenerator'
-          app='build/VersionFixer.app'
-
-          test -f "$src"
-
-          mkdir -p "$app/Contents/MacOS"
-
-          cp "$src" "$app/Contents/MacOS/VersionFixer"
-          chmod +x "$app/Contents/MacOS/VersionFixer"
-
-          cat > "$app/Contents/Info.plist" <<'PLIST'
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-<dict>
-  <key>CFBundleName</key>
-  <string>VersionFixer</string>
-
-  <key>CFBundleDisplayName</key>
-  <string>VersionFixer</string>
-
-  <key>CFBundleIdentifier</key>
-  <string>com.satan1c.versionfixer</string>
-
-  <key>CFBundleExecutable</key>
-  <string>VersionFixer</string>
-
-  <key>CFBundlePackageType</key>
-  <string>APPL</string>
-
-  <key>CFBundleVersion</key>
-  <string>1.0</string>
-
-  <key>CFBundleShortVersionString</key>
-  <string>1.0</string>
-</dict>
-</plist>
-PLIST
-
-          if [[ '${{ matrix.rid }}' == 'osx-x64' ]]; then
-            zip='build/VersionFixer-macos-x64.zip'
-          else
-            zip='build/VersionFixer-macos-arm64.zip'
-          fi
-
-          ditto -c -k --sequesterRsrc --keepParent \
-            "$app" \
-            "$zip"
+          file "${{ matrix.asset }}"
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.name }}
-          path: build/${{ matrix.asset }}
+          path: ${{ matrix.asset }}
           if-no-files-found: error
           compression-level: 0
 
   release:
-    name: Publish Release
+    name: Publish GitHub Release
     needs: build
     runs-on: ubuntu-latest
 
@@ -172,19 +114,21 @@ PLIST
 
       - name: Generate release notes
         shell: bash
-        run: bash .github/workflows/generate-release-notes.sh
+        run: |
+          bash .github/workflows/generate-release-notes.sh
 
-      - name: Verify assets
+      - name: Verify release assets
         shell: bash
         run: |
           set -euo pipefail
 
+          echo "Release assets:"
+          ls -lah release-assets
+
           test -f release-assets/VersionFixer-win-x64.exe
           test -f release-assets/VersionFixer-linux-x64
-          test -f release-assets/VersionFixer-macos-x64.zip
-          test -f release-assets/VersionFixer-macos-arm64.zip
-
-          ls -lh release-assets
+          test -f release-assets/VersionFixer-macos-x64
+          test -f release-assets/VersionFixer-macos-arm64
 
       - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2
