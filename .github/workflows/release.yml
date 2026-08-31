@@ -144,15 +144,19 @@ jobs:
         with:
           files: ./build/macos-arm64/VersionFixer.app
 
-  create-release-notes:
+  generate-release-notes:
     needs: [build-windows, build-linux, build-macos-intel, build-macos-apple-silicon]
     runs-on: ubuntu-latest
     steps:
-      - name: Generate release notes from git log
-        run: |
-          echo "# Release ${{ github.ref_name }}" >> $GITHUB_OUTPUT
-          echo "" >> $GITHUB_OUTPUT
-          echo "## Changes" >> $GITHUB_OUTPUT
-          echo "\`\`\`" >> $GITHUB_OUTPUT
-          git log ${github.sha}..HEAD --oneline 2>/dev/null || echo "No new commits since tag" >> $GITHUB_OUTPUT
-          echo "\`\`\`" >> $GITHUB_OUTPUT
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Generate release notes
+        run: bash .github/workflows/generate-release-notes.sh
+
+      - name: Upload Release Notes
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/v')
+        with:
+          files: RELEASE_NOTES.md
+          tag_name: ${{ github.ref_name }}
