@@ -5,6 +5,9 @@ on:
     tags:
       - 'v*'
 
+permissions:
+  contents: write
+
 jobs:
   build-windows:
     runs-on: windows-latest
@@ -17,12 +20,15 @@ jobs:
         with:
           dotnet-version: '10.0.x'
 
+      - name: Install UPX
+        run: choco install upx -y
+
       - name: Build with Native AOT
         run: |
-          dotnet publish VersionFixerGenerator/VersionFixerGenerator.csproj `
-            -c Release `
-            -r win-x64 `
-            --self-contained true `
+          dotnet publish VersionFixerGenerator/VersionFixerGenerator.csproj \
+            -c Release \
+            -r win-x64 \
+            --self-contained true \
             -o ./build/win-x64
 
       - name: Compress with UPX
@@ -50,14 +56,14 @@ jobs:
 
       - name: Build with Native AOT
         run: |
-          dotnet publish VersionFixerGenerator/VersionFixerGenerator.csproj `
-            -c Release `
-            -r linux-x64 `
-            --self-contained true `
+          dotnet publish VersionFixerGenerator/VersionFixerGenerator.csproj \
+            -c Release \
+            -r linux-x64 \
+            --self-contained true \
             -o ./build/linux-x64
 
       - name: Compress with UPX
-        run: upx --best ./build/linux-x64/libVersionFixer.so
+        run: upx --best ./build/linux-x64/libVersionFixer.so || echo "UPX failed, using uncompressed binary"
 
       - name: Upload to GitHub Release
         uses: softprops/action-gh-release@v1
@@ -76,14 +82,20 @@ jobs:
         with:
           dotnet-version: '10.0.x'
 
+      - name: Install UPX
+        run: brew install upx
+
       - name: Build for Intel (x64)
         run: |
           mkdir -p build/macos-x64/Contents/MacOS
-          dotnet publish VersionFixerGenerator/VersionFixerGenerator.csproj `
-            -c Release `
-            -r osx-x64 `
-            --self-contained true `
+          dotnet publish VersionFixerGenerator/VersionFixerGenerator.csproj \
+            -c Release \
+            -r osx-x64 \
+            --self-contained true \
             -o ./build/macos-x64/Contents/MacOS
+
+      - name: Compress with UPX
+        run: upx --best ./build/macos-x64/Contents/MacOS/VersionFixer || echo "UPX failed, using uncompressed binary"
 
       - name: Create Info.plist for Intel
         run: |
@@ -117,14 +129,20 @@ jobs:
         with:
           dotnet-version: '10.0.x'
 
+      - name: Install UPX
+        run: brew install upx
+
       - name: Build for Apple Silicon (arm64)
         run: |
           mkdir -p build/macos-arm64/Contents/MacOS
-          dotnet publish VersionFixerGenerator/VersionFixerGenerator.csproj `
-            -c Release `
-            -r osx-arm64 `
-            --self-contained true `
+          dotnet publish VersionFixerGenerator/VersionFixerGenerator.csproj \
+            -c Release \
+            -r osx-arm64 \
+            --self-contained true \
             -o ./build/macos-arm64/Contents/MacOS
+
+      - name: Compress with UPX
+        run: upx --best ./build/macos-arm64/Contents/MacOS/VersionFixer || echo "UPX failed, using uncompressed binary"
 
       - name: Create Info.plist for Apple Silicon
         run: |
