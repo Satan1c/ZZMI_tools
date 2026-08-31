@@ -20,9 +20,6 @@ jobs:
         with:
           dotnet-version: '10.0.x'
 
-      - name: Install UPX
-        run: choco install upx -y
-
       - name: Build with Native AOT
         run: |
           dotnet publish VersionFixerGenerator/VersionFixerGenerator.csproj `
@@ -30,9 +27,6 @@ jobs:
             -r win-x64 `
             --self-contained true `
             -o ./build/win-x64
-
-      - name: Compress with UPX
-        run: upx --best ./build/win-x64/VersionFixer.exe || echo "UPX failed, using uncompressed binary"
 
       - name: Upload to GitHub Release
         uses: softprops/action-gh-release@v1
