@@ -31,13 +31,13 @@ jobs:
             asset: build/VersionFixer-linux-x64
 
           - name: macOS Intel
-            runner: macos-13
+            runner: macos-26-intel
             rid: osx-x64
             source: build/publish/VersionFixerGenerator
             asset: build/VersionFixer-macos-x64
 
           - name: macOS Apple Silicon
-            runner: macos-14
+            runner: macos-latest
             rid: osx-arm64
             source: build/publish/VersionFixerGenerator
             asset: build/VersionFixer-macos-arm64
