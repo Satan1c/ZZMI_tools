@@ -29,7 +29,6 @@ jobs:
             -c Release `
             -r win-x64 `
             --self-contained true `
-            -p:TargetFramework=net10.0 `
             -o ./build/win-x64
 
       - name: Compress with UPX
@@ -61,7 +60,6 @@ jobs:
             -c Release \
             -r linux-x64 \
             --self-contained true \
-            -p:TargetFramework=net10.0 \
             -o ./build/linux-x64
 
       - name: Compress with UPX
@@ -94,7 +92,6 @@ jobs:
             -c Release \
             -r osx-x64 \
             --self-contained true \
-            -p:TargetFramework=net10.0 \
             -o ./build/macos-x64/Contents/MacOS
 
       - name: Compress with UPX
@@ -142,7 +139,6 @@ jobs:
             -c Release \
             -r osx-arm64 \
             --self-contained true \
-            -p:TargetFramework=net10.0 \
             -o ./build/macos-arm64/Contents/MacOS
 
       - name: Compress with UPX
