@@ -2,6 +2,7 @@
 
 VERSION="${GITHUB_REF#refs/tags/}"
 
+# Generate release description with usage instructions
 cat > RELEASE_NOTES.md << EOF
 # Release $VERSION
 
@@ -28,10 +29,10 @@ Automatically updates asset hash references in your `.ini` files when game versi
 
 ## Required Files
 
-**IMPORTANT:** For VersionFixer to work, you must also have `PlayerCharacterData.json` in the same folder as the executable:
+**IMPORTANT:** For VersionFixer to work, you must also have \`PlayerCharacterData.json\` in the same folder as the executable:
 
-- **Windows/Linux:** Copy `PlayerCharacterData.json` to your Mods folder alongside the executable
-- **macOS:** Drag both `VersionFixer Intel.app` (or Apple Silicon version) AND `PlayerCharacterData.json` to your Mods folder
+- **Windows/Linux:** Copy \`PlayerCharacterData.json\` to your Mods folder alongside the executable
+- **macOS:** Drag both \`VersionFixer Intel.app\` (or Apple Silicon version) AND \`PlayerCharacterData.json\` to your Mods folder
 
 The JSON file contains hash mappings for the specific game version you're using. Without it, VersionFixer cannot determine which hashes to update.
 
@@ -39,7 +40,7 @@ The JSON file contains hash mappings for the specific game version you're using.
 
 ### Apply Fixes (Default Behavior)
 Run the updater without arguments to apply all version fixes:
-```bash
+\`\`\`bash
 # Windows
 VersionFixer.exe
 
@@ -51,11 +52,11 @@ VersionFixer.exe
 
 # macOS Apple Silicon
 ./VersionFixer Apple Silicon.app/Contents/MacOS/VersionFixer
-```
+\`\`\`
 
 ### Specify Custom Mods Folder
 If your `.ini` files are not in the current directory, use the \`--path\` flag:
-```bash
+\`\`\`bash
 # Windows
 VersionFixer.exe --path "/path/to/your/Mods"
 
@@ -64,13 +65,13 @@ VersionFixer.exe --path "/path/to/your/Mods"
 
 # macOS
 ./VersionFixer Intel.app/Contents/MacOS/VersionFixer --path "/path/to/your/Mods"
-```
+\`\`\`
 
-**Note:** When using \`--path\`, VersionFixer looks for `PlayerCharacterData.json` in that specified folder. Make sure the JSON file is there too!
+**Note:** When using \`--path\`, VersionFixer looks for \`PlayerCharacterData.json\` in that specified folder. Make sure the JSON file is there too!
 
 ### Undo All Previous Fixes
 Revert all changes made by VersionFixer:
-```bash
+\`\`\`bash
 # Windows
 VersionFixer.exe undo
 
@@ -79,7 +80,7 @@ VersionFixer.exe undo
 
 # macOS
 ./VersionFixer Intel.app/Contents/MacOS/VersionFixer undo
-```
+\`\`\`
 
 ## Logging Levels
 - \`-l v\` — Verbose (show every change made)
@@ -90,7 +91,12 @@ Example: \`VersionFixer.exe -l v --path "/Mods"\`
 
 ## Important Notes
 - **Automatic Backups:** Original `.ini` files are backed up as \`DISABLED_versionfix_[timestamp].ini\` before any changes. You can restore them by running the undo command.
-- **Game Version Compatibility:** This updater supports game version detected from `PlayerCharacterData.json`. Make sure you have the correct JSON file for your game version!
+- **Game Version Compatibility:** This updater supports game version detected from \`PlayerCharacterData.json\`. Make sure you have the correct JSON file for your game version!
 - **Manual Override:** You can always edit `.ini` files directly, but VersionFixer ensures consistency across all references (hash, object_indexes, object_index_counts).
 
 EOF
+
+# Append changelog from git log
+echo "" >> RELEASE_NOTES.md
+echo "## Changelog" >> RELEASE_NOTES.md
+git log ${GITHUB_SHA}..HEAD --oneline 2>/dev/null >> RELEASE_NOTES.md || echo "No new commits since tag" >> RELEASE_NOTES.md
