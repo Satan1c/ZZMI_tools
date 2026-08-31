@@ -2,7 +2,6 @@
 
 VERSION="${GITHUB_REF#refs/tags/}"
 
-# Generate release description with usage instructions
 cat > RELEASE_NOTES.md << EOF
 # Release $VERSION
 
@@ -12,27 +11,30 @@ Automatically updates asset hash references in your `.ini` files when game versi
 ## Installation
 
 ### Windows
-1. Download \`VersionFixer.exe\` from the assets below
+1. Download \`VersionFixer-win-x64.exe\` from the assets below
 2. Copy it to your **Mods folder** (same folder as your `.ini` files)
 
 ### Linux
-1. Download \`libVersionFixer.so\` from the assets below
+1. Download \`VersionFixer-linux-x64\` from the assets below
 2. Copy it to your **Mods folder** (same folder as your `.ini` files)
+3. Make it executable: \`chmod +x VersionFixer-linux-x64\`
 
 ### macOS (Intel)
-1. Download \`VersionFixer Intel.app\` from the assets below
-2. Copy it to any folder (Desktop, Downloads, Mods folder, etc.)
+1. Download \`VersionFixer-macos-x64.zip\` from the assets below
+2. Extract the zip file
+3. Move \`VersionFixer.app\` to any folder (Desktop, Downloads, Mods folder, etc.)
 
 ### macOS (Apple Silicon M1/M2/M3)
-1. Download \`VersionFixer Apple Silicon.app\` from the assets below
-2. Copy it to any folder (Desktop, Downloads, Mods folder, etc.)
+1. Download \`VersionFixer-macos-arm64.zip\` from the assets below
+2. Extract the zip file
+3. Move \`VersionFixer.app\` to any folder (Desktop, Downloads, Mods folder, etc.)
 
 ## Required Files
 
 **IMPORTANT:** For VersionFixer to work, you must also have \`PlayerCharacterData.json\` in the same folder as the executable:
 
 - **Windows/Linux:** Copy \`PlayerCharacterData.json\` to your Mods folder alongside the executable
-- **macOS:** Drag both \`VersionFixer Intel.app\` (or Apple Silicon version) AND \`PlayerCharacterData.json\` to your Mods folder
+- **macOS:** Drag both \`VersionFixer.app\` AND \`PlayerCharacterData.json\` to your Mods folder
 
 The JSON file contains hash mappings for the specific game version you're using. Without it, VersionFixer cannot determine which hashes to update.
 
@@ -42,29 +44,29 @@ The JSON file contains hash mappings for the specific game version you're using.
 Run the updater without arguments to apply all version fixes:
 \`\`\`bash
 # Windows
-VersionFixer.exe
+VersionFixer-win-x64.exe
 
 # Linux
-./libVersionFixer.so
+./VersionFixer-linux-x64
 
 # macOS Intel
-./VersionFixer Intel.app/Contents/MacOS/VersionFixer
+./VersionFixer.app/Contents/MacOS/VersionFixer
 
 # macOS Apple Silicon
-./VersionFixer Apple Silicon.app/Contents/MacOS/VersionFixer
+./VersionFixer.app/Contents/MacOS/VersionFixer
 \`\`\`
 
 ### Specify Custom Mods Folder
 If your `.ini` files are not in the current directory, use the \`--path\` flag:
 \`\`\`bash
 # Windows
-VersionFixer.exe --path "/path/to/your/Mods"
+VersionFixer-win-x64.exe --path "/path/to/your/Mods"
 
 # Linux
-./libVersionFixer.so --path "/path/to/your/Mods"
+./VersionFixer-linux-x64 --path "/path/to/your/Mods"
 
 # macOS
-./VersionFixer Intel.app/Contents/MacOS/VersionFixer --path "/path/to/your/Mods"
+./VersionFixer.app/Contents/MacOS/VersionFixer --path "/path/to/your/Mods"
 \`\`\`
 
 **Note:** When using \`--path\`, VersionFixer looks for \`PlayerCharacterData.json\` in that specified folder. Make sure the JSON file is there too!
@@ -73,13 +75,13 @@ VersionFixer.exe --path "/path/to/your/Mods"
 Revert all changes made by VersionFixer:
 \`\`\`bash
 # Windows
-VersionFixer.exe undo
+VersionFixer-win-x64.exe undo
 
 # Linux
-./libVersionFixer.so undo
+./VersionFixer-linux-x64 undo
 
 # macOS
-./VersionFixer Intel.app/Contents/MacOS/VersionFixer undo
+./VersionFixer.app/Contents/MacOS/VersionFixer undo
 \`\`\`
 
 ## Logging Levels
@@ -87,7 +89,7 @@ VersionFixer.exe undo
 - \`-l s\` — Standard (summary only, default)
 - \`-l n\` — No logging
 
-Example: \`VersionFixer.exe -l v --path "/Mods"\`
+Example: \`VersionFixer-win-x64.exe -l v --path "/Mods"\`
 
 ## Important Notes
 - **Automatic Backups:** Original `.ini` files are backed up as \`DISABLED_versionfix_[timestamp].ini\` before any changes. You can restore them by running the undo command.
@@ -96,7 +98,6 @@ Example: \`VersionFixer.exe -l v --path "/Mods"\`
 
 EOF
 
-# Append changelog from git log
 echo "" >> RELEASE_NOTES.md
 echo "## Changelog" >> RELEASE_NOTES.md
 git log ${GITHUB_SHA}..HEAD --oneline 2>/dev/null >> RELEASE_NOTES.md || echo "No new commits since tag" >> RELEASE_NOTES.md
