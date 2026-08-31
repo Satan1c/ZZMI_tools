@@ -1,0 +1,117 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Build with Native AOT
+        run: |
+          dotnet publish VersionFixerGenerator/VersionFixerGenerator.csproj `
+            -c Release `
+            -r win-x64 `
+            --self-contained true `
+            -o ./build/win-x64
+
+      - name: Compress with UPX
+        run: upx --best ./build/win-x64/VersionFixer.exe
+
+      - name: Upload to GitHub Release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/v')
+        with:
+          files: ./build/win-x64/VersionFixer.exe
+
+  build-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Build with Native AOT
+        run: |
+          dotnet publish VersionFixerGenerator/VersionFixerGenerator.csproj `
+            -c Release `
+            -r linux-x64 `
+            --self-contained true `
+            -o ./build/linux-x64
+
+      - name: Compress with UPX
+        run: upx --best ./build/linux-x64/libVersionFixer.so
+
+      - name: Upload to GitHub Release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/v')
+        with:
+          files: ./build/linux-x64/libVersionFixer.so
+
+  build-macos:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Build with Native AOT
+        run: |
+          mkdir -p build/macos-x64/Contents/MacOS
+          dotnet publish VersionFixerGenerator/VersionFixerGenerator.csproj `
+            -c Release `
+            -r osx-x64 `
+            --self-contained true `
+            -o ./build/macos-x64/Contents/MacOS
+
+      - name: Create Info.plist
+        run: |
+          echo '<?xml version="1.0" encoding="UTF-8"?>' > build/macos-x64/Contents/Info.plist
+          echo '<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">' >> build/macos-x64/Contents/Info.plist
+          echo '<plist version="1.0">' >> build/macos-x64/Contents/Info.plist
+          echo '<dict>' >> build/macos-x64/Contents/Info.plist
+          echo '  <key>CFBundleName</key>' >> build/macos-x64/Contents/Info.plist
+          echo '  <string>VersionFixer</string>' >> build/macos-x64/Contents/Info.plist
+          echo '  <key>LSMinimumSystemVersion</key>' >> build/macos-x64/Contents/Info.plist
+          echo '  <string>10.13</string>' >> build/macos-x64/Contents/Info.plist
+          echo '  <key>NSHighResolutionCapable</key>' >> build/macos-x64/Contents/Info.plist
+          echo '  <true/>' >> build/macos-x64/Contents/Info.plist
+          echo '</dict>' >> build/macos-x64/Contents/Info.plist
+          echo '</plist>' >> build/macos-x64/Contents/Info.plist
+
+      - name: Upload to GitHub Release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/v')
+        with:
+          files: ./build/macos-x64/VersionFixer.app
+
+  create-release-notes:
+    needs: [build-windows, build-linux, build-macos]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate release notes from git log
+        run: |
+          echo "# Release ${{ github.ref_name }}" >> $GITHUB_OUTPUT
+          echo "" >> $GITHUB_OUTPUT
+          echo "## Changes" >> $GITHUB_OUTPUT
+          echo "\`\`\`" >> $GITHUB_OUTPUT
+          git log ${github.sha}..HEAD --oneline 2>/dev/null || echo "No new commits since tag" >> $GITHUB_OUTPUT
+          echo "\`\`\`" >> $GITHUB_OUTPUT
