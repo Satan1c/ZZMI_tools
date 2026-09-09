@@ -10,8 +10,62 @@ permissions:
   contents: write
 
 jobs:
-  build:
-    name: Build ${{ matrix.name }}
+  changes:
+    name: Detect changed projects
+    runs-on: ubuntu-latest
+    outputs:
+      vgremapper: ${{ steps.diff.outputs.vgremapper }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Find previous release tag
+        id: prev_tag
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          current="${GITHUB_REF_NAME}"
+
+          # All tags, newest first by creation date; grab the one right after
+          # the current tag in that ordering = the previous release.
+          prev=$(git tag --sort=-creatordate \
+            | awk -v cur="$current" '$0==cur{found=1; next} found{print; exit}')
+
+          echo "current=$current" >> "$GITHUB_OUTPUT"
+          echo "prev=$prev" >> "$GITHUB_OUTPUT"
+          echo "Current tag: $current"
+          echo "Previous tag: ${prev:-<none, treating as first release>}"
+
+      - name: Diff VgRemapper since previous release
+        id: diff
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          prev="${{ steps.prev_tag.outputs.prev }}"
+
+          if [ -z "$prev" ]; then
+            echo "No previous tag found (first release) - building VgRemapper."
+            echo "vgremapper=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          changed=$(git diff --name-only "$prev" HEAD -- VgRemapper/ || true)
+
+          if [ -n "$changed" ]; then
+            echo "VgRemapper changed since $prev:"
+            echo "$changed"
+            echo "vgremapper=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "No VgRemapper changes since $prev - skipping its build."
+            echo "vgremapper=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  build-hash-updater:
+    name: Build HashUpdater ${{ matrix.name }}
     runs-on: ${{ matrix.runner }}
 
     strategy:
@@ -92,24 +146,123 @@ jobs:
       - name: Upload build artifact
         uses: actions/upload-artifact@v7
         with:
-          name: ${{ matrix.name }}
+          name: HashUpdater-${{ matrix.name }}
+          path: ${{ matrix.asset }}
+          if-no-files-found: error
+          compression-level: 0
+
+  build-vgremapper:
+    name: Build VgRemapper ${{ matrix.name }}
+    needs: changes
+    if: needs.changes.outputs.vgremapper == 'true'
+    runs-on: ${{ matrix.runner }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Windows x64
+            runner: windows-latest
+            rid: win-x64
+            source: build/publish/VgRemapper.exe
+            asset: build/VgRemapper-win-x64.exe
+
+          - name: Linux x64
+            runner: ubuntu-latest
+            rid: linux-x64
+            source: build/publish/VgRemapper
+            asset: build/VgRemapper-linux-x64
+
+          - name: macOS Intel
+            runner: macos-26-intel
+            rid: osx-x64
+            source: build/publish/VgRemapper
+            asset: build/VgRemapper-macos-x64
+
+          - name: macOS Apple Silicon
+            runner: macos-latest
+            rid: osx-arm64
+            source: build/publish/VgRemapper
+            asset: build/VgRemapper-macos-arm64
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Publish Native AOT
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          rm -rf build
+          mkdir -p build/publish
+
+          dotnet publish VgRemapper/VgRemapper.csproj \
+            --configuration Release \
+            --runtime "${{ matrix.rid }}" \
+            --self-contained true \
+            --output build/publish
+
+          echo "Published files:"
+          find build/publish -maxdepth 1 -type f -print
+
+          test -f "${{ matrix.source }}"
+
+      - name: Package Windows
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          Copy-Item `
+            "${{ matrix.source }}" `
+            "${{ matrix.asset }}"
+
+      - name: Package Unix
+        if: runner.os != 'Windows'
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          cp "${{ matrix.source }}" "${{ matrix.asset }}"
+          chmod +x "${{ matrix.asset }}"
+
+          file "${{ matrix.asset }}"
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: VgRemapper-${{ matrix.name }}
           path: ${{ matrix.asset }}
           if-no-files-found: error
           compression-level: 0
 
   release:
     name: Publish GitHub Release
-    needs: build
+    needs: [changes, build-hash-updater, build-vgremapper]
+    if: ${{ !cancelled() && needs.build-hash-updater.result == 'success' }}
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout
         uses: actions/checkout@v7
 
-      - name: Download build artifacts
+      - name: Download HashUpdater artifacts
         uses: actions/download-artifact@v8
         with:
-          path: release-assets
+          path: release-assets/hash-updater
+          pattern: "HashUpdater-*"
+          merge-multiple: true
+
+      - name: Download VgRemapper artifacts
+        if: needs.changes.outputs.vgremapper == 'true'
+        uses: actions/download-artifact@v8
+        with:
+          path: release-assets/vgremapper
+          pattern: "VgRemapper-*"
           merge-multiple: true
 
       - name: Generate release notes
@@ -117,23 +270,32 @@ jobs:
         run: |
           bash .github/workflows/generate-release-notes.sh
 
-      - name: Verify release assets
+      - name: Package archives
         shell: bash
         run: |
           set -euo pipefail
 
-          echo "Release assets:"
-          ls -lah release-assets
+          mkdir -p dist
 
-          test -f release-assets/VersionFixer-win-x64.exe
-          test -f release-assets/VersionFixer-linux-x64
-          test -f release-assets/VersionFixer-macos-x64
-          test -f release-assets/VersionFixer-macos-arm64
+          echo "HashUpdater assets:"
+          ls -lah release-assets/hash-updater
+          (cd release-assets/hash-updater && zip -j "$GITHUB_WORKSPACE/dist/HashUpdater-all-platforms.zip" *)
+
+          if [ -d release-assets/vgremapper ]; then
+            echo "VgRemapper assets:"
+            ls -lah release-assets/vgremapper
+            (cd release-assets/vgremapper && zip -j "$GITHUB_WORKSPACE/dist/VgRemapper-all-platforms.zip" *)
+          else
+            echo "No VgRemapper changes this release - skipping its archive."
+          fi
+
+          echo "Release archives:"
+          ls -lah dist
 
       - name: Publish GitHub Release
         uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ github.ref_name }}
           body_path: RELEASE_NOTES.md
-          files: release-assets/*
+          files: dist/*.zip
           fail_on_unmatched_files: true

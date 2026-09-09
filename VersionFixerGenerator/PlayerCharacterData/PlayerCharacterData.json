@@ -909,6 +909,122 @@
 		"Comment": "3 Qingyi Hair texcoord"
 	},
 	{
+		"From": "785b21f5",
+		"To": "28e05a59",
+		"Comment": "1 Remielle Body ib",
+		"FromIndexes": "[0,57612]",
+		"ToIndexes": "[0,59094]",
+		"FromIndexCounts": "[57612,1014]",
+		"ToIndexCounts": "[59094,984]"
+	},
+	{
+		"From": "9e8a27ae",
+		"To": "da54a57a",
+		"Comment": "1 Remielle Body blend"
+	},
+	{
+		"From": "679a1bd8",
+		"To": "d16f6790",
+		"Comment": "1 Remielle Body position"
+	},
+	{
+		"From": "9e33a8b6",
+		"To": "b943ec9e",
+		"Comment": "1 Remielle Body texcoord"
+	},
+	{
+		"From": "7a92a10a",
+		"To": "97664f2f",
+		"Comment": "1 Remielle Body draw"
+	},
+	{
+		"From": "f57f3e40",
+		"To": "92cb56c9",
+		"Comment": "1 RemielleMoonlight Body ib",
+		"FromIndexes": "[0,64092]",
+		"ToIndexes": "[0,64626]",
+		"FromIndexCounts": "[64092,222]",
+		"ToIndexCounts": "[64626,222]"
+	},
+	{
+		"From": "7f6fe876",
+		"To": "93b69961",
+		"Comment": "1 RemielleMoonlight Body blend"
+	},
+	{
+		"From": "554d46cf",
+		"To": "0929171b",
+		"Comment": "1 RemielleMoonlight Body position"
+	},
+	{
+		"From": "5dcc6ee1",
+		"To": "c24cc6a1",
+		"Comment": "1 RemielleMoonlight Body texcoord"
+	},
+	{
+		"From": "22ec622c",
+		"To": "6a0d36f2",
+		"Comment": "1 RemielleMoonlight Body draw"
+	},
+	{
+		"From": "09a51ed3",
+		"To": "24a512cb",
+		"Comment": "2 RemielleMoonlight Legs ib",
+		"FromIndexes": "[0,15618]",
+		"ToIndexes": "[0,15546]",
+		"FromIndexCounts": "[15618,114]",
+		"ToIndexCounts": "[15546,114]"
+	},
+	{
+		"From": "ff05e5f9",
+		"To": "3841a909",
+		"Comment": "2 RemielleMoonlight Legs blend"
+	},
+	{
+		"From": "fa9635bc",
+		"To": "11fbd4a3",
+		"Comment": "2 RemielleMoonlight Legs position"
+	},
+	{
+		"From": "7c0db158",
+		"To": "14ab0adc",
+		"Comment": "2 RemielleMoonlight Legs texcoord"
+	},
+	{
+		"From": "96dc0a8e",
+		"To": "ea50e1d1",
+		"Comment": "2 RemielleMoonlight Legs draw"
+	},
+	{
+		"From": "241deac5",
+		"To": "2cd6516a",
+		"Comment": "1 RemielleSummer Body ib",
+		"FromIndexes": "[0,56376]",
+		"ToIndexes": "[0,56736]",
+		"FromIndexCounts": "[56376,12534]",
+		"ToIndexCounts": "[56736,12534]"
+	},
+	{
+		"From": "9bca83d8",
+		"To": "5ec5e567",
+		"Comment": "1 RemielleSummer Body blend"
+	},
+	{
+		"From": "13c77c3a",
+		"To": "22d04ad5",
+		"Comment": "1 RemielleSummer Body position"
+	},
+	{
+		"From": "c55c57ce",
+		"To": "d637a74d",
+		"Comment": "1 RemielleSummer Body texcoord"
+	},
+	{
+		"From": "48288582",
+		"To": "df41c403",
+		"Comment": "1 RemielleSummer Body draw"
+	},
+	{
 		"From": "a23aa8a3",
 		"To": "38daef11",
 		"Comment": "1 Sigrid Body ib",
